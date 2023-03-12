@@ -1,1 +1,17 @@
 
+letra --> [a-zA-Z_]
+digitoN --> [1-9]
+id --> letra(letra|\d)*
+
+caracter --> \S{1}
+string --> caracter+
+
+disminucion --> \--
+suma --> \+
+equivalente --> \=
+final --> \$
+disyuncion --> \~
+aperturaB --> \{
+aperturaP --> \(
+comenL --> @
+cerraduraC --> _/
