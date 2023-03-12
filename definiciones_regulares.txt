@@ -1,17 +1,38 @@
 
 letra --> [a-zA-Z_]
 digitoN --> [1-9]
+digito --> [0-9]
 id --> letra(letra|\d)*
 
 caracter --> \S{1}
 string --> caracter+
 
+numeroE --> {resta}? 0 | {digitoN}{digito}*
+numeroF --> {resta}? 0 | {digitoN}{digito}*.{digito}*
+
+tipo --> 'int' | 'bool' | 'string' | 'char' | 'float'
+
+aumento --> ++
 disminucion --> \--
+multiplicacion --> *
 suma --> \+
+resta --> -
 equivalente --> \=
+negacion --> !
 final --> \$
-disyuncion --> \~
+division --> /
+modulo --> \~
+potencia **
 aperturaB --> \{
+cerraduraB --> \}
+aperturaC --> \[
+cerraduraC --> \]
 aperturaP --> \(
-comenL --> @
-cerraduraC --> _/
+cerraduraP --> \)
+comentarioL --> @
+aberturaComentario --> _/
+cerraduraComentario --> _/
+conjuncion --> ^
+disyuncion --> #
+True --> 0 | true
+False --> 1 | false
