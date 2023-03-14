@@ -11,28 +11,58 @@ numeroE --> {resta}? 0 | {digitoN}{digito}*
 numeroF --> {resta}? 0 | {digitoN}{digito}*.{digito}*
 
 tipo --> 'int' | 'bool' | 'string' | 'char' | 'float'
+tipoNum --> 'int' | 'float'
 
-aumento --> ++
+aumento --> \++
 disminucion --> \--
-multiplicacion --> *
+multiplicacion --> \*
 suma --> \+
-resta --> -
+resta --> \-
 equivalente --> \=
-negacion --> !
-final --> \$
-division --> /
+negacion --> \!
+finalExpre --> \$
+division --> \/
 modulo --> \~
-potencia **
+potencia --> \**
 aperturaB --> \{
 cerraduraB --> \}
 aperturaC --> \[
 cerraduraC --> \]
 aperturaP --> \(
 cerraduraP --> \)
-comentarioL --> @
-aberturaComentario --> _/
-cerraduraComentario --> _/
-conjuncion --> ^
-disyuncion --> #
+comentarioL --> \@
+comentApert --> \/_ 
+comentCerrad --> \_/
+conjuncion --> \^
+disyuncion --> \#
 True --> 0 | true
 False --> 1 | false
+bool --> True | False
+menor --> \<
+mayor --> \>
+menorIgual --> \=>
+mayorIgual --> \=<
+diferente --> \!=
+igual --> \==
+
+operandoAritmet --> '+' | '-' | '/' | '*' | '~' | '**' 
+operandoRacion --> '<' | '>' | '=>' | '=<' | '!=' | '=='
+
+operando --> numeroE | numeroF
+creaVarNum --> tipoNum id equivalente ((numeroE | numeroF) | operando operandoAritmet operando)
+operacionNumSim --> operando operandoAritmet operando 
+operacionNum --> aperturaP operacionNumSim cerraduraP 
+operacionSumUna --> operando + 1
+operacionResUna --> operando - 1
+asignVar --> tipo id equivalente id
+operacionRacSim --> operando operandoRacion operando
+operacionRac --> aperturaP operacionRacSim cerraduraP 
+
+cmd --> (creaVarNum | operacionNum | asignVar | operacionRac) finalExpre
+bloque --> cmd*
+return --> 'return' (id | bool)
+
+fun --> tipo id aperturaP {tipo id}*? cerraduraP aperturaP bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
+funMain --> tipo 'main' aperturaP cerraduraP aperturaB bloque cerraduraB
+comentarioLineal --> comentarioL string
+comentarioBloque --> comentApert string comentCerrad
