@@ -1,20 +1,7 @@
-
-letra --> [a-zA-Z_]
-digitoN --> [1-9]
-digito --> [0-9]
-id --> letra(letra|\d)*
-
-caracter --> \S{1}
-string --> caracter+
-
-numeroE --> {resta}? 0 | {digitoN}{digito}*
-numeroF --> {resta}? 0 | {digitoN}{digito}*.{digito}*
-
-tipo --> 'int' | 'bool' | 'string' | 'char' | 'float'
-tipoNum --> 'int' | 'float'
+##########################################################Signos y operandos#################################################################
 
 aumento --> \++
-disminucion --> \--
+decremento--> \--
 multiplicacion --> \*
 suma --> \+
 resta --> \-
@@ -37,6 +24,15 @@ conjuncion --> \^
 disyuncion --> \#
 True --> 0 | true
 False --> 1 | false
+
+#################################################################bases########################################################################
+
+letra --> [a-zA-Z_]
+id --> letra(letra|\d)*
+caracter --> \S{1}
+string --> caracter+
+digito --> [0-9]
+digitoN --> [1-9]
 bool --> True | False
 menor --> \<
 mayor --> \>
@@ -45,24 +41,41 @@ mayorIgual --> \=<
 diferente --> \!=
 igual --> \==
 
-operandoAritmet --> '+' | '-' | '/' | '*' | '~' | '**' 
-operandoRacion --> '<' | '>' | '=>' | '=<' | '!=' | '=='
+###############################################################agrupaciones####################################################################
+
+tipo --> 'int' | 'bool' | 'string' | 'char' | 'float'
+tipoNum --> 'int' | 'float'
+
+operandoArit --> '+' | '-' | '/' | '*' | '~' | '**' 
+operandoRac --> '<' | '>' | '=>' | '=<' | '!=' | '=='
+
+###########################################################Expresiones complejas###############################################################
+
+numeroE --> resta? 0 | digitoNdigito*
+numeroF --> resta? 0.digito* | digitoNdigito*.digito* #agregacion de la posibilidad de 0.x
+
+#hay que definir un grupo de tipos de variables y preguntar si se deben definir todas las variables de todos los tipos por aparte.
+
 
 operando --> numeroE | numeroF
-creaVarNum --> tipoNum id equivalente ((numeroE | numeroF) | operando operandoAritmet operando)
-operacionNumSim --> operando operandoAritmet operando 
-operacionNum --> aperturaP operacionNumSim cerraduraP 
-operacionSumUna --> operando + 1
-operacionResUna --> operando - 1
+operacionNumSim --> operando operandoArit operando 
+operacionNum --> operacionNumSim (operandoArit  operando)*
+variableNum --> (tipoNum id equivalente ((numeroE | numeroF)) | operacionNum
+operacionSumUna --> aumento operando | aumento variableNum
+operacionResUna --> decremento operando | decremento variableNum
 asignVar --> tipo id equivalente id
-operacionRacSim --> operando operandoRacion operando
-operacionRac --> aperturaP operacionRacSim cerraduraP 
+operacionRacSim --> operando operandoRac operando
+operacionRac --> operacionRacSim (operandoRac operando)*
 
-cmd --> (creaVarNum | operacionNum | asignVar | operacionRac) finalExpre
+cmd --> (creaVarNum | operacionNum | asignVar | operacionRac)finalExpre
 bloque --> cmd*
 return --> 'return' (id | bool)
 
-fun --> tipo id aperturaP {tipo id}*? cerraduraP aperturaP bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
+funcion --> tipo id aperturaP variable* cerraduraP aperturaB bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
 funMain --> tipo 'main' aperturaP cerraduraP aperturaB bloque cerraduraB
 comentarioLineal --> comentarioL string
 comentarioBloque --> comentApert string comentCerrad
+
+if --> "if" aperturaP condicion cerraduraP aperturaB bloque cerraduraB
+else --> "else" aperturaB bloque cerraduraB
+elif --> "elif" aperturaP condicion cerraduraP aperturaB bloque cerraduraB
