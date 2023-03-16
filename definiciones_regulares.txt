@@ -45,6 +45,7 @@ igual --> \==
 
 tipo --> 'int' | 'bool' | 'string' | 'char' | 'float'
 tipoNum --> 'int' | 'float'
+tipoFuncion --> tipoNum | 'bool'
 
 operandoArit --> '+' | '-' | '/' | '*' | '~' | '**' 
 operandoRac --> '<' | '>' | '=>' | '=<' | '!=' | '=='
@@ -63,19 +64,25 @@ operacionNum --> operacionNumSim (operandoArit  operando)*
 variableNum --> (tipoNum id equivalente ((numeroE | numeroF)) | operacionNum
 operacionSumUna --> aumento operando | aumento variableNum
 operacionResUna --> decremento operando | decremento variableNum
-asignVar --> tipo id equivalente id
 operacionRacSim --> operando operandoRac operando
 operacionRac --> operacionRacSim (operandoRac operando)*
 
-cmd --> (creaVarNum | operacionNum | asignVar | operacionRac)finalExpre
-bloque --> cmd*
-return --> 'return' (id | bool)
-
-funcion --> tipo id aperturaP variable* cerraduraP aperturaB bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
-funMain --> tipo 'main' aperturaP cerraduraP aperturaB bloque cerraduraB
-comentarioLineal --> comentarioL string
-comentarioBloque --> comentApert string comentCerrad
+variable --> tipo id 
+variableAsig --> variable equivalente (operacionNum | funcion | operacionRac | caracter | string | id)
+parametro --> tipo id
 
 if --> "if" aperturaP condicion cerraduraP aperturaB bloque cerraduraB
-else --> "else" aperturaB bloque cerraduraB
 elif --> "elif" aperturaP condicion cerraduraP aperturaB bloque cerraduraB
+else --> "else" aperturaB bloque cerraduraB
+bloqueIf --> if elif? else?
+
+funcion --> tipoFuncion id aperturaP parametro (\,parametro)* cerraduraP aperturaB bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
+
+declaracion --> (variable | variableAsig | operacionNum | operacionRac)finalExpre
+delaraciones --> declaracion | bloqueIf | funcion
+bloque --> declaraciones*
+return --> 'return' (id | bool)
+
+funMain --> tipo 'main' aperturaP variable (\,variable)* cerraduraP aperturaB bloque cerraduraB
+comentarioLineal --> comentarioL string
+comentarioBloque --> comentApert string comentCerrad
