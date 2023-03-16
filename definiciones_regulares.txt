@@ -67,22 +67,35 @@ operacionResUna --> decremento operando | decremento variableNum
 operacionRacSim --> operando operandoRac operando
 operacionRac --> operacionRacSim (operandoRac operando)*
 
-variable --> tipo id 
+variable --> tipo id
 variableAsig --> variable equivalente (operacionNum | funcion | operacionRac | caracter | string | id)
-parametro --> tipo id
 
 if --> "if" aperturaP condicion cerraduraP aperturaB bloque cerraduraB
 elif --> "elif" aperturaP condicion cerraduraP aperturaB bloque cerraduraB
 else --> "else" aperturaB bloque cerraduraB
 bloqueIf --> if elif? else?
 
-funcion --> tipoFuncion id aperturaP parametro (\,parametro)* cerraduraP aperturaB bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
+funcion --> tipoFuncion id aperturaP variable? (\,variable)* cerraduraP aperturaB bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
 
 declaracion --> (variable | variableAsig | operacionNum | operacionRac)finalExpre
-delaraciones --> declaracion | bloqueIf | funcion
+delaraciones --> declaracion | bloqueIf | funcion#
 bloque --> declaraciones*
-return --> 'return' (id | bool)
+return --> 'return' (id | numeroE | numeroF)
 
-funMain --> tipo 'main' aperturaP variable (\,variable)* cerraduraP aperturaB bloque cerraduraB
+funMain --> tipo 'main' aperturaP variable? (\,variable)* cerraduraP aperturaB bloque cerraduraB
 comentarioLineal --> comentarioL string
 comentarioBloque --> comentApert string comentCerrad
+
+########################################################################
+Fabian
+arreglos
+Definir conjunciones, disyunciones y negaciones
+condiciones para ifs
+
+Aivy
+definir do-while y for 
+definir break
+definir funciones print e input
+
+Hay que investigar terminales, no terminales , producciones y simbolo inicial.
+
