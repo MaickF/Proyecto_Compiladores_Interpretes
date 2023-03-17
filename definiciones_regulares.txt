@@ -1,5 +1,6 @@
 ##########################################################Signos y operandos#################################################################
 
+
 aumento --> \++
 decremento--> \--
 multiplicacion --> \*
@@ -75,16 +76,28 @@ elif --> "elif" aperturaP condicion cerraduraP aperturaB bloque cerraduraB
 else --> "else" aperturaB bloque cerraduraB
 bloqueIf --> if elif? else?
 
+do --> "do" aperturaB bloque cerraduraB
+while --> "while" aperturaP condicion cerraduraP
+bloqueDoWhile --> do while
+
+for --> "for" variable "in" id 
+bloqueFor --> for aperturaB bloque cerraduraB
+
 funcion --> tipoFuncion id aperturaP variable? (\,variable)* cerraduraP aperturaB bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
 
 declaracion --> (variable | variableAsig | operacionNum | operacionRac)finalExpre
-delaraciones --> declaracion | bloqueIf | funcion#
+declaraciones --> declaracion | bloqueIf | funcion | bloqueDoWhile | bloqueFor
 bloque --> declaraciones*
 return --> 'return' (id | numeroE | numeroF)
 
 funMain --> tipo 'main' aperturaP variable? (\,variable)* cerraduraP aperturaB bloque cerraduraB
 comentarioLineal --> comentarioL string
 comentarioBloque --> comentApert string comentCerrad
+print --> "print" aperturaP string cerraduraP
+inputVar --> string | tipoNum
+input --> "input" aperturaP inputVar cerraduraP
+
+programa --> bloque
 
 ########################################################################
 Fabian
@@ -93,9 +106,9 @@ Definir conjunciones, disyunciones y negaciones
 condiciones para ifs
 
 Aivy
-definir do-while y for 
+
 definir break
-definir funciones print e input
+
 
 Hay que investigar terminales, no terminales , producciones y simbolo inicial.
 
