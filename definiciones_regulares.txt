@@ -81,6 +81,7 @@ variableB --> "bool" id equivalente condicion
 expNegada --> negacion(condicion | variableB | operandoBool)
 
 variable --> tipo id | arreglo
+#------variable --> tipo (id | arregloSim)
 variableAsig --> (variable equivalente (funcionAsig | caracter | string | id)) | variableNum | variableB | arregloAsig
 
 if --> "if" aperturaP condicion* cerraduraP aperturaB bloque break? cerraduraB
