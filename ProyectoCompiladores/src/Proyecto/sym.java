@@ -5,8 +5,8 @@
 
 package Proyecto;
 
-/** CUP generated interface containing symbol constants. */
-public interface sym {
+/** CUP generated class containing symbol constants. */
+public class sym {
   /* terminals */
   public static final int TIMES = 20;
   public static final int RBLOQUE = 12;
