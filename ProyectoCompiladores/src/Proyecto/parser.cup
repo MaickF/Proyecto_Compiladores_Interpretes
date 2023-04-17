@@ -39,19 +39,14 @@ non terminal tipo, tipoFuncion, tipoNum, operacionArit, operacionLog, operacionR
 /* Precedences */
 precedence left suma, resta;
 precedence left multiplicacion;
-precedence left UMINUS;
-
 
 /* The grammar rules */
 
 
-expr     ::= expr:e1 suma  expr:e2         {: RESULT = e1+e2;       :}
-             |expr:e1 resta expr:e2        {: RESULT = e1-e2;       :}
-             |expr:e1 multiplicacion expr:e2        {: RESULT = e1*e2; :}
-             |resta expr:e                 {: RESULT = -e;          :}
-  	     %prec UMINUS
-       | LPAREN expr:e RPAREN	         {: RESULT = e;           :}
-       | NUMBER:n	                     {: RESULT = n;           :}
+expr      ::= expr:e1 suma expr:e2         {: RESULT = e1+e2;       :}
+             | expr:e1 resta expr:e2        {: RESULT = e1-e2;       :}
+             | expr:e1 multiplicacion expr:e2        {: RESULT = e1*e2;       :}
+       | INTEGER_LITERAL:n	                     {: RESULT = n;           :}
              ;
 
 //Agrupaciones

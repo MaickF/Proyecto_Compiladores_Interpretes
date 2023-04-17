@@ -80,7 +80,7 @@ mayor  = ">"
 menorIgual  = "<="
 mayorIgual  = ">="
 diferente  = "!="
-numeroE = resta? ("0" | digitoN digito*)
+numeroE = {resta}? ("0" | {digitoN} {digito}*)
 
 
 %state STRING
@@ -133,7 +133,7 @@ numeroE = resta? ("0" | digitoN digito*)
 {mayor}                 { return symbol(sym.mayor); }
 {diferente}             { return symbol(sym.diferente); }
 {letra}                 {return symbol(sym.letra);}
-{numeroE}                {return symbol(sym.sym.INTEGER_LITERAL);}
+{numeroE}                {return symbol(sym.INTEGER_LITERAL);}
 {bool}                  {return symbol(sym.bool);}
 
 /* comments */
