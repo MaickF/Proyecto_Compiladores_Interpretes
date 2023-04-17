@@ -11,10 +11,10 @@ public class App {
         mp = new MainProject();
         Files.deleteIfExists(Paths.get(basepath+"\\src\\Proyecto\\Lexer.java"));
         Files.deleteIfExists(Paths.get(basepath+"\\src\\Proyecto\\sym.java"));
-        Files.deleteIfExists(Paths.get(basepath+"\\src\\Proyecto\\Parser.java"));
+        Files.deleteIfExists(Paths.get(basepath+"\\src\\Proyecto\\parser.java"));
         mp.initLexerParser(scannerPath, parserPath);
         Files.move(Paths.get(basepath+"\\sym.java"), Paths.get(basepath+"\\src\\Proyecto\\sym.java"));
-        Files.move(Paths.get(basepath+"\\Parser.java"), Paths.get(basepath+"\\src\\Proyecto\\Parser.java"));
+        Files.move(Paths.get(basepath+"\\parser.java"), Paths.get(basepath+"\\src\\Proyecto\\parser.java"));
     }
 
     public static void pruebas()throws Exception{

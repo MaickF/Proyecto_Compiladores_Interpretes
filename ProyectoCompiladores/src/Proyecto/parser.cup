@@ -24,17 +24,17 @@ terminal            STRING_LITERAL, LBLOQUE, RBLOQUE, STRING;
 terminal            SEMI, UMINUS, LPAREN, RPAREN;
 terminal            aperturaB, cerraduraB, aperturaC, cerraduraC, aperturaP, cerraduraP, comentarioL;
 terminal            comentApert, comentCerrad, finalExpre, True, False;
-terminal            letra, ident, caracter, digito, digitoN, bool;
+terminal            letra, ident, caracter, bool;
 terminal            menor, mayor, menorIgual, mayorIgual, diferente;
 terminal            aumento, equivalente, igual, suma, decremento, multiplicacion, resta, negacion, division, modulo, potencia, conjuncion, disyuncion;
 terminal Integer    NUMBER;
+terminal Integer    INTEGER_LITERAL;
 
 /* Non terminals */
 non terminal            expr_list;
 non terminal Integer    expr;      // used to store evaluated subexpressions
 non terminal tipo, tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac;
 
-start with inicio;
 
 /* Precedences */
 precedence left suma, resta;
@@ -92,11 +92,3 @@ operacionLog ::= diferente
                 |disyuncion
                 ;
 
-numeroE ::= resta? ("0" | digito digitoN*);
-
-inicio ::= numeroE;
-
-//numeroE ::= resta? ("0" | digito digitoN*);
-
-
-//numeroF ::= resta? ("0""."digito* | digito Ndigito*\"."digito*);

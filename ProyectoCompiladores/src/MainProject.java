@@ -20,7 +20,7 @@ public class MainProject {
     }
 
     public void generarParser(String rutaParser) throws internal_error, Exception, IOException{
-        String[] strArr = {rutaParser};
+        String[] strArr = {"-parser", "parser", rutaParser};
         java_cup.Main.main(strArr);
     }
 
@@ -47,7 +47,7 @@ public class MainProject {
     public void ejercicioParser(String ruta)throws Exception{
         Reader reader = new FileReader(ruta);
         Lexer lex = new Lexer(reader);
-        Parser parser = new Parser(lex);
+        parser parser = new parser(lex);
         parser.parse(); 
     }
     

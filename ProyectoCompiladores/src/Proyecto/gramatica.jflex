@@ -39,8 +39,6 @@ EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}?
 DocumentationComment = "/**" {CommentContent} "*"+ "/"
 CommentContent       = ( [^*] | \*+ [^/*] )*
 
-DecIntegerLiteral = 0 | [1-9][0-9]*
-
 aumento = "++"
 decremento = "--"
 multiplicacion = "*"
@@ -82,6 +80,7 @@ mayor  = ">"
 menorIgual  = "<="
 mayorIgual  = ">="
 diferente  = "!="
+numeroE = resta? ("0" | digitoN digito*)
 
 
 %state STRING
@@ -134,8 +133,7 @@ diferente  = "!="
 {mayor}                 { return symbol(sym.mayor); }
 {diferente}             { return symbol(sym.diferente); }
 {letra}                 {return symbol(sym.letra);}
-{digito}                {return symbol(sym.digito);}
-{digitoN}               {return symbol(sym.digitoN);}
+{numeroE}                {return symbol(sym.sym.INTEGER_LITERAL);}
 {bool}                  {return symbol(sym.bool);}
 
 /* comments */
