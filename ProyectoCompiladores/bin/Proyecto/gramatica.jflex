@@ -39,31 +39,104 @@ EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}?
 DocumentationComment = "/**" {CommentContent} "*"+ "/"
 CommentContent       = ( [^*] | \*+ [^/*] )*
 
-Identifier = [:jletter:] [:jletterdigit:]*
-
 DecIntegerLiteral = 0 | [1-9][0-9]*
+
+aumento = "++"
+decremento = "--"
+multiplicacion = "*"
+suma = "+"
+resta = "-"
+equivalente = "="
+negacion = "!"
+division = "/"
+modulo = "~"
+potencia = "**"
+
+aperturaB = "{"
+cerraduraB = "}"
+aperturaC = "["
+cerraduraC = "]"
+aperturaP = "("
+cerraduraP = ")"
+comentarioL = "@"
+comentApert = "/_"
+comentCerrad = "_/"
+finalExpre = "$"
+True = 0 | “true”
+False = 1 | “false”
+
+conjuncion = "^"
+disyuncion = "#"
+igual = "=="
+
+letra  = [a-zA-Z_]
+ident  = {letra}({letra}|\d)*
+//caracter  = '[^']'
+//string  = "\"[^\"\n]*\""
+digito  = [0-9]
+digitoN  = [1-9]
+bool  = {True} | {False}
+
+menor  = "<"
+mayor  = ">"
+menorIgual  = "<="
+mayorIgual  = ">="
+diferente  = "!="
+
 
 %state STRING
 
 %%
 
 /* keywords */
-<YYINITIAL> "abstract"           { return symbol(sym.ABSTRACT); }
-<YYINITIAL> "boolean"            { return symbol(sym.BOOLEAN); }
+<YYINITIAL> "boolean"            { return symbol(sym.BOOL); }
+<YYINITIAL> "int"                { return symbol(sym.INT); }
+<YYINITIAL> "char"               { return symbol(sym.CHAR); }
+<YYINITIAL> "string"             { return symbol(sym.string); }
+<YYINITIAL> "float"              { return symbol(sym.FLOAT); }
 <YYINITIAL> "break"              { return symbol(sym.BREAK); }
 
 <YYINITIAL> {
 /* identifiers */ 
-{Identifier}                   { return symbol(sym.IDENTIFIER); }
+{ident}                   { return symbol(sym.ident); }
 
 /* literals */
-{DecIntegerLiteral}            { return symbol(sym.INTEGER_LITERAL); }
-\"                             { string.setLength(0); yybegin(STRING); }
-
+{finalExpre}            {return symbol(sym.finalExpre);}
+{aperturaB}             {return symbol(sym.aperturaB);}
+{cerraduraB}            {return symbol(sym.cerraduraB);}
+{aperturaC}             {return symbol(sym.aperturaC);}
+{cerraduraC}            {return symbol(sym.cerraduraC);}
+{aperturaP}             {return symbol(sym.aperturaP);}
+{cerraduraP}            {return symbol(sym.cerraduraP);}
+{comentarioL}           {return symbol(sym.comentarioL);}
+{comentApert}           {return symbol(sym.comentApert);}
+{comentCerrad}          {return symbol(sym.comentCerrad);}
+//{caracter}              {return symbol(sym.caracter);}
+//{string}                {return symbol(sym.STRING);}
+\"                      { string.setLength(0); yybegin(STRING); }
 /* operators */
-"="                            { return symbol(sym.EQ); }
-"=="                           { return symbol(sym.EQEQ); }
-"+"                            { return symbol(sym.PLUS); }
+{equivalente}           { return symbol(sym.equivalente); }
+{igual}                 { return symbol(sym.igual); }
+{suma}                  { return symbol(sym.suma); }
+{aumento}               { return symbol(sym.aumento); }
+{decremento}            { return symbol(sym.decremento); }
+{multiplicacion}        { return symbol(sym.multiplicacion); }
+{resta}                 { return symbol(sym.resta); }
+{negacion}              { return symbol(sym.negacion); }
+{division}              { return symbol(sym.division); }
+{modulo}                { return symbol(sym.modulo); }
+{potencia}              { return symbol(sym.potencia); }
+{conjuncion}            { return symbol(sym.conjuncion); }
+{disyuncion}            { return symbol(sym.disyuncion); }
+{menor}                 { return symbol(sym.menor); }
+{menorIgual}            { return symbol(sym.menorIgual); }
+{mayorIgual}            { return symbol(sym.mayorIgual); }
+{mayor}                 { return symbol(sym.mayor); }
+{diferente}             { return symbol(sym.diferente); }
+{letra}                 {return symbol(sym.letra);}
+{digito}                {return symbol(sym.digito);}
+{digitoN}               {return symbol(sym.digitoN);}
+{bool}                  {return symbol(sym.bool);}
 
 /* comments */
 {Comment}                      { /* ignore */ }

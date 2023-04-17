@@ -19,31 +19,84 @@ init with {: :};
 scan with {: return lex.next_token(); :};
 
 /* Terminals (tokens returned by the scanner). */
-terminal            ABSTRACT, BOOLEAN, BREAK;
-terminal            INT, CHAR, STRING, FLOAT, IDENTIFIER, STRING_LITERAL, LBLOQUE, RBLOQUE;
-terminal            EQ, EQEQ, MINUS, DIVI;
-terminal            SEMI, PLUS, COMA, TIMES, UMINUS, LPAREN, RPAREN;
+terminal            BOOL, BREAK, string, INT, FLOAT, CHAR;
+terminal            STRING_LITERAL, LBLOQUE, RBLOQUE, STRING;
+terminal            SEMI, UMINUS, LPAREN, RPAREN;
+terminal            aperturaB, cerraduraB, aperturaC, cerraduraC, aperturaP, cerraduraP, comentarioL;
+terminal            comentApert, comentCerrad, finalExpre, True, False;
+terminal            letra, ident, caracter, digito, digitoN, bool;
+terminal            menor, mayor, menorIgual, mayorIgual, diferente;
+terminal            aumento, equivalente, igual, suma, decremento, multiplicacion, resta, negacion, division, modulo, potencia, conjuncion, disyuncion;
 terminal Integer    NUMBER;
-terminal Integer    INTEGER_LITERAL;        // our scanner provides numbers as integers
 
 /* Non terminals */
 non terminal            expr_list;
 non terminal Integer    expr;      // used to store evaluated subexpressions
+non terminal tipo, tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac;
+
+start with inicio;
 
 /* Precedences */
-precedence left PLUS, MINUS;
-precedence left TIMES;
+precedence left suma, resta;
+precedence left multiplicacion;
 precedence left UMINUS;
 
-/* The grammar rules */0
-expr_list ::= expr_list expr:e SEMI         {: System.out.println(e);:}
-            | expr:e SEMI                   {: System.out.println(e);:}
-;
-expr      ::= expr:e1 PLUS  expr:e2         {: RESULT = e1+e2;       :}
-             | expr:e1 MINUS expr:e2        {: RESULT = e1-e2;       :}
-             | expr:e1 TIMES expr:e2        {: RESULT = e1*e2;       :}
-             | MINUS expr:e                 {: RESULT = -e;          :}
+
+/* The grammar rules */
+
+
+expr     ::= expr:e1 suma  expr:e2         {: RESULT = e1+e2;       :}
+             |expr:e1 resta expr:e2        {: RESULT = e1-e2;       :}
+             |expr:e1 multiplicacion expr:e2        {: RESULT = e1*e2; :}
+             |resta expr:e                 {: RESULT = -e;          :}
   	     %prec UMINUS
        | LPAREN expr:e RPAREN	         {: RESULT = e;           :}
        | NUMBER:n	                     {: RESULT = n;           :}
              ;
+
+//Agrupaciones
+tipo ::= string
+        |INT
+        |CHAR
+        |FLOAT
+        |bool
+        ;
+
+tipoNum ::=  INT
+            |FLOAT
+            ;
+    
+tipoFuncion ::=  tipoNum
+                |bool
+                ;
+
+operacionArit ::= suma 
+                |resta 
+                |division
+                |multiplicacion 
+                |modulo 
+                |potencia
+                ;
+
+operacionRac ::= menor 
+                |mayor 
+                |menorIgual 
+                |mayorIgual 
+                |diferente 
+                |igual
+                ;
+
+operacionLog ::= diferente
+                |igual 
+                |conjuncion 
+                |disyuncion
+                ;
+
+numeroE ::= resta? ("0" | digito digitoN*);
+
+inicio ::= numeroE;
+
+//numeroE ::= resta? ("0" | digito digitoN*);
+
+
+//numeroF ::= resta? ("0""."digito* | digito Ndigito*\"."digito*);

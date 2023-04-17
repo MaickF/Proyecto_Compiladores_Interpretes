@@ -3,8 +3,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.Reader;
 
-import Proyecto.Lexer;
-import Proyecto.parser;
 import java_cup.internal_error;
 import java_cup.runtime.Symbol;
 
@@ -27,18 +25,17 @@ public class MainProject {
     }
 
     public void ejercicioLexer(String ruta)throws Exception{
-        System.out.println("Entro");
         Reader reader = new BufferedReader(new FileReader(ruta));
         reader.read();
         Lexer lex = new Lexer(reader);
         int i = 0;
         Symbol token;
-        System.out.println("AntesIteracion");
+        //sym valor = new sym();
         while(true){
-            System.out.println("Itera");
+            System.out.println("---------------------------------------");
             token = lex.next_token();
             if(token.sym != 0)
-                System.out.println("Token:" + token.sym + ", valor; " + lex.yytext());
+                System.out.println("Token:" + sym.terminalNames[token.sym] + ", valor; " + lex.yytext());
             else{
                 System.out.println("Cantidad de lexemas encontrados: " +i);
                 return;
@@ -50,7 +47,7 @@ public class MainProject {
     public void ejercicioParser(String ruta)throws Exception{
         Reader reader = new FileReader(ruta);
         Lexer lex = new Lexer(reader);
-        parser parser = new parser(lex);
+        Parser parser = new Parser(lex);
         parser.parse(); 
     }
     

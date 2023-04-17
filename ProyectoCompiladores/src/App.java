@@ -3,12 +3,9 @@ import java.nio.file.Paths;
 
 public class App {
     public static void generarParserLexer() throws Exception{
-        System.out.println("Inicio");
         String basepath, scannerPath, parserPath;
         MainProject mp;
         basepath = System.getProperty("user.dir");
-        System.out.println("antes");
-        System.out.println(basepath);
         scannerPath = basepath+"\\src\\Proyecto\\gramatica.jflex";
         parserPath = basepath+"\\src\\Proyecto\\parser.cup";
         mp = new MainProject();
@@ -27,12 +24,12 @@ public class App {
         scannerPath = basepath+"\\src\\pruebas\\pruebaLexer.txt";
         parserPath = basepath+"\\src\\pruebas\\pruebaParser.txt";
         mp = new MainProject();
-        mp.ejercicioLexer(scannerPath);
-        //mp.ejercicioParser(parserPath);
+        //mp.ejercicioLexer(scannerPath);
+        mp.ejercicioParser(parserPath);
     }
 
     public static void main(String[] args) throws Exception {
-        generarParserLexer();
+        generarParserLexer(); 
         pruebas();
     }
 }
