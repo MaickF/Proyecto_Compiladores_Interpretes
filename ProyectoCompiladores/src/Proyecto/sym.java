@@ -28,6 +28,7 @@ public class sym {
   public static final int INT = 5;
   public static final int mainC = 52;
   public static final int equivalente = 38;
+  public static final int inC = 62;
   public static final int multiplicacion = 42;
   public static final int letra = 28;
   public static final int string = 4;
@@ -35,6 +36,7 @@ public class sym {
   public static final int caracter = 30;
   public static final int menorIgual = 34;
   public static final int BOOL = 2;
+  public static final int printC = 61;
   public static final int menor = 32;
   public static final int doC = 54;
   public static final int aumento = 37;
@@ -46,7 +48,7 @@ public class sym {
   public static final int mayor = 33;
   public static final int False = 27;
   public static final int negacion = 44;
-  public static final int NUMBER = 61;
+  public static final int NUMBER = 63;
   public static final int BREAK = 3;
   public static final int punto = 51;
   public static final int finalExpre = 25;
@@ -64,14 +66,14 @@ public class sym {
   public static final int whileC = 55;
   public static final int returnC = 60;
   public static final int aperturaC = 18;
-  public static final int FLOAT_LITERAL = 63;
+  public static final int FLOAT_LITERAL = 65;
   public static final int aperturaB = 16;
   public static final int division = 45;
   public static final int cerraduraC = 19;
   public static final int inputC = 59;
   public static final int cerraduraB = 17;
   public static final int modulo = 46;
-  public static final int INTEGER_LITERAL = 62;
+  public static final int INTEGER_LITERAL = 64;
   public static final String[] terminalNames = new String[] {
   "EOF",
   "error",
@@ -134,6 +136,8 @@ public class sym {
   "elifC",
   "inputC",
   "returnC",
+  "printC",
+  "inC",
   "NUMBER",
   "INTEGER_LITERAL",
   "FLOAT_LITERAL"

@@ -27,7 +27,7 @@ terminal            comentApert, comentCerrad, finalExpre, True, False;
 terminal            letra, ident, caracter, bool;
 terminal            menor, mayor, menorIgual, mayorIgual, diferente;
 terminal            aumento, equivalente, igual, suma, decremento, multiplicacion, resta, negacion, division, modulo, potencia, conjuncion, disyuncion;
-terminal            coma, punto, mainC, forC, doC, whileC, ifC, elseC, elifC, inputC, returnC, printC;
+terminal            coma, punto, mainC, forC, doC, whileC, ifC, elseC, elifC, inputC, returnC, printC, inC;
 terminal            NUMBER;
 terminal            INTEGER_LITERAL;
 terminal            FLOAT_LITERAL;
@@ -37,6 +37,7 @@ non terminal            expr_list;
 non terminal            expr;      // used to store evaluated subexpressions
 non terminal tipo, tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac, lista, tipoArreglo;
 non terminal grupoArreglo, arregloSim, arregloAsig, arregloInd;
+non terminal returnD, input, print, param, funcionAsig, listaIdent;
 
 
 /* Precedences */
@@ -47,7 +48,7 @@ precedence left suma, resta;
 
 precedence left coma;
 
-start with arregloInd;
+start with funcionAsig;
 
 /* The grammar rules */
 
@@ -58,14 +59,16 @@ expr      ::= expr:e1 suma expr:e2               {: RESULT = e1+"+"+e2; System.o
              | INTEGER_LITERAL:n	             {: RESULT = n.toString(); System.out.println(RESULT); :}
              ;
 
+
+
 lista ::= lista:l1 coma lista:l2              {: RESULT = l1+","+l2; System.out.println(RESULT); :}
          |grupoArreglo:n                        {: RESULT = n; System.out.println(RESULT); :}
         ;
 
-
 grupoArreglo ::= INTEGER_LITERAL {: RESULT = "prueba1"; :}
                 |FLOAT_LITERAL {: RESULT = "prueba2"; :}
                 |caracter {: RESULT = "prueba3"; :}
+                |STRING_LITERAL {: RESULT = "prueba4"; :}
                 ;
 
 arregloSim ::= tipoArreglo ident:a aperturaC INTEGER_LITERAL:b cerraduraC  {: RESULT = "tipo "+a+" ["+b.toString()+"]"; System.out.println(RESULT);:}; 
@@ -79,19 +82,38 @@ returnD ::= returnC ident:a {: RESULT = "return " + a; System.out.println(RESULT
             | returnC FLOAT_LITERAL:a {: RESULT = "return " + a.toString(); System.out.println(RESULT);:}
             ;
 
-print ::= printC aperturaP string cerraduraP;
-input --> inputC aperturaP ident cerraduraP;
+print ::= printC aperturaP STRING_LITERAL:a cerraduraP {: RESULT = "print(" + a + ")"; System.out.println(RESULT);:};
+input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input(" + a + ")"; System.out.println(RESULT);:};
 
-param ::= param:l1 coma param:l2              {: RESULT = l1+","+l2; System.out.println(RESULT); :}
-         |tipo:a ident:b                        {: RESULT = n; System.out.println(RESULT); :}
+param ::= param:a coma param:b              {: RESULT = a+","+b; System.out.println(RESULT); :}
+         |tipo:a ident:b                        {: RESULT = a+" "+b; System.out.println(RESULT); :}
         ;
-        
+
+listaIdent ::= listaIdent:a coma listaIdent:b {: RESULT = a+","+b; System.out.println(RESULT); :}
+                |ident:a                      {: RESULT = a; System.out.println(RESULT); :}
+                ;
+
+funcionAsig ::= ident:a aperturaP listaIdent:b cerraduraP {: RESULT = a+"("+b+")"; System.out.println(RESULT); :}
+                |ident:a aperturaP cerraduraP        {: RESULT = a+"()"; System.out.println(RESULT); :}
+                ;
+
+variable ::= tipo ident;
+
+variableAsig --> variable equivalente agrupacionVariable;
+
+agrupacionVariable ::= funcionAsig 
+                       | caracter 
+                       | STRING_LITERAL 
+                       | ident
+                       ;
+//(variableNum | variableB)
+
 //Agrupaciones
 tipo ::= string
         |INT
         |CHAR
         |FLOAT
-        |bool
+        |BOOL
         ;
 
 tipoArreglo ::= tipoNum 

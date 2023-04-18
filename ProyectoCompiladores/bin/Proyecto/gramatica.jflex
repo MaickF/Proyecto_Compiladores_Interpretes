@@ -67,8 +67,19 @@ conjuncion = "^"
 disyuncion = "#"
 igual = "=="
 
+mainC = "main"
+forC = "for"
+doC = "do"
+whileC = "while"
+ifC = "if"
+elseC = "else"
+elifC = "elif"
+inputC = "input"
+printC = "print"
+returnC = "return"
+
 letra  = [a-zA-Z_]
-ident  = {letra}({letra}|\d)*
+ident  = {letra} ({letra}|\d)*
 caracter  = '[^']'
 string  = "\"[^\"\n]*\""
 digito  = [0-9]
@@ -84,16 +95,6 @@ numeroE = {resta}? ("0" | {digitoN} {digito}*)
 numeroF = {resta}? ("0" "." {digito}* | {digitoN} {digito}*"."{digito}*)
 coma = ","
 punto = "."
-mainC = "main"
-forC = "for"
-doC = "do"
-whileC = "while"
-ifC = "if"
-elseC = "else"
-elifC = "elif"
-inputC = "input"
-printC = "print"
-returnC = "return"
 
 %state STRING
 
@@ -108,8 +109,6 @@ returnC = "return"
 <YYINITIAL> "break"              { return symbol(sym.BREAK); }
 
 <YYINITIAL> {
-/* identifiers */ 
-{ident}                   { return symbol(sym.ident, yytext()); }
 
 /* literals */
 {finalExpre}            {return symbol(sym.finalExpre);}
@@ -136,7 +135,7 @@ returnC = "return"
 {returnC}               {return symbol(sym.returnC);}
 {elifC}                 {return symbol(sym.elifC);}
 {printC}                 {return symbol(sym.printC);}
-"in"                 {return symbol(sym.inC);}
+"in"                    {return symbol(sym.inC);}
 \"                      { string.setLength(0); yybegin(STRING); }
 /* operators */
 {equivalente}           { return symbol(sym.equivalente); }
@@ -162,6 +161,8 @@ returnC = "return"
 {numeroF}                {return symbol(sym.FLOAT_LITERAL, yytext());}
 {bool}                  {return symbol(sym.bool);}
 
+/* identifiers */ 
+{ident}                   { return symbol(sym.ident, yytext()); }
 /* comments */
 {Comment}                      { /* ignore */ }
 

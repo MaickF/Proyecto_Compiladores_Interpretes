@@ -81,7 +81,7 @@ variableB --> "bool" id equivalente condicion
 expNegada --> negacion(condicion | variableB | operandoBool)
 
 variable --> tipo id
-variableAsig --> (variable equivalente (funcionAsig | caracter | string | id)) | variableNum | variableB
+variableAsig --> variable equivalente (funcionAsig | caracter | string | id | variableNum | variableB)
 
 if --> "if" aperturaP condicion* cerraduraP aperturaB bloque break? cerraduraB
 elif --> "elif" aperturaP condicion* cerraduraP aperturaB bloque break? cerraduraB
@@ -96,16 +96,17 @@ break --> "break"
 for --> "for" (variable | variableAsig) "in" id (operacionSumaUna | operacionRestaUna) aperturaB bloque break? crerraduraB
 bloqueFor --> for aperturaB bloque cerraduraB
 
-parametroMul --> id (\,id)*
-funcion --> tipoFuncion id aperturaP (id|parametro)? cerraduraP aperturaB bloque return cerraduraB    ##como se pondria que permita 0 o muchos como args?
-funcionAsig --> id aperturaP (id|parametro)? cerraduraP
+param --> tipo id (\,tipo id)*
+listaIdent --> id (\,id)*
+funcion --> tipoFuncion id aperturaP param? cerraduraP aperturaB bloque return cerraduraB
+funcionAsig --> id aperturaP listaIdent? cerraduraP
 
 declaracion --> (variable | variableAsig | operacionNum | operacionRac | arreglo | arregloAsig | arregloInd | input | print)finalExpre
 sentencia --> declaracion | bloqueIf | funcion | bloqueDoWhile | bloqueFor
 bloque --> sentencia*
 return --> "return" (id | numeroE | numeroF)
 
-funMain --> tipo "main" aperturaP (id|parametro)? cerraduraP aperturaB bloque cerraduraB
+funMain --> tipo "main" aperturaP param? cerraduraP aperturaB bloque cerraduraB
 comentarioLineal --> comentarioL string
 comentarioBloque --> comentApert string comentCerrad
 print --> "print" aperturaP string cerraduraP

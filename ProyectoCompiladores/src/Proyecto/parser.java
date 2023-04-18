@@ -31,19 +31,23 @@ public class parser extends java_cup.runtime.lr_parser {
   /** Production table. */
   protected static final short _production_table[][] = 
     unpackFromStrings(new String[] {
-    "\000\051\000\002\002\004\000\002\003\005\000\002\003" +
+    "\000\065\000\002\002\004\000\002\003\005\000\002\003" +
     "\005\000\002\003\005\000\002\003\003\000\002\012\005" +
     "\000\002\012\003\000\002\014\003\000\002\014\003\000" +
-    "\002\014\003\000\002\015\007\000\002\016\007\000\002" +
-    "\017\010\000\002\004\003\000\002\004\003\000\002\004" +
-    "\003\000\002\004\003\000\002\004\003\000\002\013\003" +
-    "\000\002\013\003\000\002\013\003\000\002\006\003\000" +
-    "\002\006\003\000\002\005\003\000\002\005\003\000\002" +
+    "\002\014\003\000\002\014\003\000\002\015\007\000\002" +
+    "\016\007\000\002\017\010\000\002\020\004\000\002\020" +
+    "\004\000\002\020\004\000\002\022\006\000\002\021\006" +
+    "\000\002\023\005\000\002\023\004\000\002\025\005\000" +
+    "\002\025\003\000\002\024\006\000\002\024\005\000\002" +
+    "\004\003\000\002\004\003\000\002\004\003\000\002\004" +
+    "\003\000\002\004\003\000\002\013\003\000\002\013\003" +
+    "\000\002\013\003\000\002\006\003\000\002\006\003\000" +
+    "\002\005\003\000\002\005\003\000\002\007\003\000\002" +
     "\007\003\000\002\007\003\000\002\007\003\000\002\007" +
-    "\003\000\002\007\003\000\002\007\003\000\002\011\003" +
+    "\003\000\002\007\003\000\002\011\003\000\002\011\003" +
     "\000\002\011\003\000\002\011\003\000\002\011\003\000" +
-    "\002\011\003\000\002\011\003\000\002\010\003\000\002" +
-    "\010\003\000\002\010\003\000\002\010\003" });
+    "\002\011\003\000\002\010\003\000\002\010\003\000\002" +
+    "\010\003\000\002\010\003" });
 
   /** Access to production table. */
   public short[][] production_table() {return _production_table;}
@@ -51,13 +55,12 @@ public class parser extends java_cup.runtime.lr_parser {
   /** Parse-action table. */
   protected static final short[][] _action_table = 
     unpackFromStrings(new String[] {
-    "\000\014\000\004\037\004\001\002\000\004\024\007\001" +
-    "\002\000\004\002\006\001\002\000\004\002\001\001\002" +
-    "\000\004\100\010\001\002\000\004\025\011\001\002\000" +
-    "\004\050\012\001\002\000\010\040\016\100\014\101\015" +
-    "\001\002\000\004\002\ufff5\001\002\000\004\002\ufffa\001" +
-    "\002\000\004\002\ufff9\001\002\000\004\002\ufff8\001\002" +
-    "" });
+    "\000\013\000\004\037\005\001\002\000\004\002\015\001" +
+    "\002\000\004\026\006\001\002\000\006\027\007\037\010" +
+    "\001\002\000\004\002\uffe9\001\002\000\006\027\uffeb\064" +
+    "\uffeb\001\002\000\006\027\012\064\013\001\002\000\004" +
+    "\002\uffea\001\002\000\004\037\010\001\002\000\006\027" +
+    "\uffec\064\uffec\001\002\000\004\002\001\001\002" });
 
   /** Access to parse-action table. */
   public short[][] action_table() {return _action_table;}
@@ -65,11 +68,11 @@ public class parser extends java_cup.runtime.lr_parser {
   /** <code>reduce_goto</code> table. */
   protected static final short[][] _reduce_table = 
     unpackFromStrings(new String[] {
-    "\000\014\000\004\017\004\001\001\000\002\001\001\000" +
-    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001\000\002\001\001\000\004\014\012\001\001\000" +
-    "\002\001\001\000\002\001\001\000\002\001\001\000\002" +
-    "\001\001" });
+    "\000\013\000\004\024\003\001\001\000\002\001\001\000" +
+    "\002\001\001\000\004\025\010\001\001\000\002\001\001" +
+    "\000\002\001\001\000\002\001\001\000\002\001\001\000" +
+    "\004\025\013\001\001\000\002\001\001\000\002\001\001" +
+    "" });
 
   /** Access to <code>reduce_goto</code> table. */
   public short[][] reduce_table() {return _reduce_table;}
@@ -156,7 +159,7 @@ class CUP$parser$actions {
       switch (CUP$parser$act_num)
         {
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 0: // $START ::= arregloInd EOF 
+          case 0: // $START ::= funcionAsig EOF 
             {
               Object RESULT =null;
 		int start_valleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
@@ -281,7 +284,16 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 10: // arregloSim ::= tipoArreglo ident aperturaC INTEGER_LITERAL cerraduraC 
+          case 10: // grupoArreglo ::= STRING_LITERAL 
+            {
+              Object RESULT =null;
+		 RESULT = "prueba4"; 
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("grupoArreglo",10, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 11: // arregloSim ::= tipoArreglo ident aperturaC INTEGER_LITERAL cerraduraC 
             {
               Object RESULT =null;
 		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).left;
@@ -296,7 +308,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 11: // arregloAsig ::= arregloSim equivalente aperturaC lista cerraduraC 
+          case 12: // arregloAsig ::= arregloSim equivalente aperturaC lista cerraduraC 
             {
               Object RESULT =null;
 		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-4)).left;
@@ -311,7 +323,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 12: // arregloInd ::= ident aperturaC INTEGER_LITERAL cerraduraC equivalente grupoArreglo 
+          case 13: // arregloInd ::= ident aperturaC INTEGER_LITERAL cerraduraC equivalente grupoArreglo 
             {
               Object RESULT =null;
 		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-5)).left;
@@ -329,7 +341,151 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 13: // tipo ::= string 
+          case 14: // returnD ::= returnC ident 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		 RESULT = "return " + a; System.out.println(RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("returnD",14, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 15: // returnD ::= returnC INTEGER_LITERAL 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		 RESULT = "return " + a.toString(); System.out.println(RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("returnD",14, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 16: // returnD ::= returnC FLOAT_LITERAL 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		 RESULT = "return " + a.toString(); System.out.println(RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("returnD",14, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 17: // print ::= printC aperturaP STRING_LITERAL cerraduraP 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		 RESULT = "print(" + a + ")"; System.out.println(RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("print",16, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 18: // input ::= inputC aperturaP ident cerraduraP 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		 RESULT = "input(" + a + ")"; System.out.println(RESULT);
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("input",15, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 19: // param ::= param coma param 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
+		int bleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int bright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object b = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		 RESULT = a+","+b; System.out.println(RESULT); 
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("param",17, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 20: // param ::= tipo ident 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		int bleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int bright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object b = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		 RESULT = a+" "+b; System.out.println(RESULT); 
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("param",17, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 21: // listaIdent ::= listaIdent coma listaIdent 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
+		int bleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int bright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object b = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		 RESULT = a+","+b; System.out.println(RESULT); 
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("listaIdent",19, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 22: // listaIdent ::= ident 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.peek()).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.peek()).value;
+		 RESULT = a; System.out.println(RESULT); 
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("listaIdent",19, ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 23: // funcionAsig ::= ident aperturaP listaIdent cerraduraP 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-3)).value;
+		int bleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).left;
+		int bright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-1)).right;
+		Object b = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-1)).value;
+		 RESULT = a+"("+b+")"; System.out.println(RESULT); 
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("funcionAsig",18, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-3)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 24: // funcionAsig ::= ident aperturaP cerraduraP 
+            {
+              Object RESULT =null;
+		int aleft = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).left;
+		int aright = ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)).right;
+		Object a = (Object)((java_cup.runtime.Symbol) CUP$parser$stack.elementAt(CUP$parser$top-2)).value;
+		 RESULT = a+"()"; System.out.println(RESULT); 
+              CUP$parser$result = parser.getSymbolFactory().newSymbol("funcionAsig",18, ((java_cup.runtime.Symbol)CUP$parser$stack.elementAt(CUP$parser$top-2)), ((java_cup.runtime.Symbol)CUP$parser$stack.peek()), RESULT);
+            }
+          return CUP$parser$result;
+
+          /*. . . . . . . . . . . . . . . . . . . .*/
+          case 25: // tipo ::= string 
             {
               Object RESULT =null;
 
@@ -338,7 +494,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 14: // tipo ::= INT 
+          case 26: // tipo ::= INT 
             {
               Object RESULT =null;
 
@@ -347,7 +503,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 15: // tipo ::= CHAR 
+          case 27: // tipo ::= CHAR 
             {
               Object RESULT =null;
 
@@ -356,7 +512,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 16: // tipo ::= FLOAT 
+          case 28: // tipo ::= FLOAT 
             {
               Object RESULT =null;
 
@@ -365,7 +521,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 17: // tipo ::= bool 
+          case 29: // tipo ::= BOOL 
             {
               Object RESULT =null;
 
@@ -374,7 +530,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 18: // tipoArreglo ::= tipoNum 
+          case 30: // tipoArreglo ::= tipoNum 
             {
               Object RESULT =null;
 
@@ -383,7 +539,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 19: // tipoArreglo ::= CHAR 
+          case 31: // tipoArreglo ::= CHAR 
             {
               Object RESULT =null;
 
@@ -392,7 +548,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 20: // tipoArreglo ::= STRING 
+          case 32: // tipoArreglo ::= STRING 
             {
               Object RESULT =null;
 
@@ -401,7 +557,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 21: // tipoNum ::= INT 
+          case 33: // tipoNum ::= INT 
             {
               Object RESULT =null;
 
@@ -410,7 +566,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 22: // tipoNum ::= FLOAT 
+          case 34: // tipoNum ::= FLOAT 
             {
               Object RESULT =null;
 
@@ -419,7 +575,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 23: // tipoFuncion ::= tipoNum 
+          case 35: // tipoFuncion ::= tipoNum 
             {
               Object RESULT =null;
 
@@ -428,7 +584,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 24: // tipoFuncion ::= bool 
+          case 36: // tipoFuncion ::= bool 
             {
               Object RESULT =null;
 
@@ -437,7 +593,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 25: // operacionArit ::= suma 
+          case 37: // operacionArit ::= suma 
             {
               Object RESULT =null;
 
@@ -446,7 +602,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 26: // operacionArit ::= resta 
+          case 38: // operacionArit ::= resta 
             {
               Object RESULT =null;
 
@@ -455,7 +611,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 27: // operacionArit ::= division 
+          case 39: // operacionArit ::= division 
             {
               Object RESULT =null;
 
@@ -464,7 +620,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 28: // operacionArit ::= multiplicacion 
+          case 40: // operacionArit ::= multiplicacion 
             {
               Object RESULT =null;
 
@@ -473,7 +629,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 29: // operacionArit ::= modulo 
+          case 41: // operacionArit ::= modulo 
             {
               Object RESULT =null;
 
@@ -482,7 +638,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 30: // operacionArit ::= potencia 
+          case 42: // operacionArit ::= potencia 
             {
               Object RESULT =null;
 
@@ -491,7 +647,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 31: // operacionRac ::= menor 
+          case 43: // operacionRac ::= menor 
             {
               Object RESULT =null;
 
@@ -500,7 +656,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 32: // operacionRac ::= mayor 
+          case 44: // operacionRac ::= mayor 
             {
               Object RESULT =null;
 
@@ -509,7 +665,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 33: // operacionRac ::= menorIgual 
+          case 45: // operacionRac ::= menorIgual 
             {
               Object RESULT =null;
 
@@ -518,7 +674,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 34: // operacionRac ::= mayorIgual 
+          case 46: // operacionRac ::= mayorIgual 
             {
               Object RESULT =null;
 
@@ -527,7 +683,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 35: // operacionRac ::= diferente 
+          case 47: // operacionRac ::= diferente 
             {
               Object RESULT =null;
 
@@ -536,7 +692,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 36: // operacionRac ::= igual 
+          case 48: // operacionRac ::= igual 
             {
               Object RESULT =null;
 
@@ -545,7 +701,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 37: // operacionLog ::= diferente 
+          case 49: // operacionLog ::= diferente 
             {
               Object RESULT =null;
 
@@ -554,7 +710,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 38: // operacionLog ::= igual 
+          case 50: // operacionLog ::= igual 
             {
               Object RESULT =null;
 
@@ -563,7 +719,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 39: // operacionLog ::= conjuncion 
+          case 51: // operacionLog ::= conjuncion 
             {
               Object RESULT =null;
 
@@ -572,7 +728,7 @@ class CUP$parser$actions {
           return CUP$parser$result;
 
           /*. . . . . . . . . . . . . . . . . . . .*/
-          case 40: // operacionLog ::= disyuncion 
+          case 52: // operacionLog ::= disyuncion 
             {
               Object RESULT =null;
 
