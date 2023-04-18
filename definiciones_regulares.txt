@@ -59,7 +59,7 @@ numeroF --> resta? 0.digito* | digitoNdigito*.digito* #agregacion de la posibili
 grupoArreglo --> numeroE | caracter
 lista --> grupoArreglo (\,grupoArreglo)*
 arregloSim --> tipoArreglo id aperturaC numeroE cerraduraC
-arregloAsig--> arregloSim equivalente aperturaC (grupoarreglo | lista) cerraduraC
+arregloAsig--> arregloSim equivalente aperturaC lista cerraduraC
 arregloInd --> id aperturaC numeroE cerraduraC equivalente grupoArreglo
 
 #hay que definir un grupo de tipos de variables y preguntar si se deben definir todas las variables de todos los tipos por aparte.
