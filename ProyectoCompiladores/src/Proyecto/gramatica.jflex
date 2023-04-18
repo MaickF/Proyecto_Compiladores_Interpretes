@@ -60,8 +60,8 @@ comentarioL = "@"
 comentApert = "/_"
 comentCerrad = "_/"
 finalExpre = "$"
-True = 0 | “true”
-False = 1 | “false”
+True = "0" | “true”
+False = "1" | “false”
 
 conjuncion = "^"
 disyuncion = "#"
@@ -69,8 +69,8 @@ igual = "=="
 
 letra  = [a-zA-Z_]
 ident  = {letra}({letra}|\d)*
-//caracter  = '[^']'
-//string  = "\"[^\"\n]*\""
+caracter  = '[^']'
+string  = "\"[^\"\n]*\""
 digito  = [0-9]
 digitoN  = [1-9]
 bool  = {True} | {False}
@@ -81,7 +81,18 @@ menorIgual  = "<="
 mayorIgual  = ">="
 diferente  = "!="
 numeroE = {resta}? ("0" | {digitoN} {digito}*)
-
+numeroF = {resta}? ("0" "." {digito}* | {digitoN} {digito}*"."{digito}*)
+coma = ","
+punto = "."
+mainC = "main"
+forC = "for"
+doC = "do"
+whileC = "while"
+ifC = "if"
+elseC = "else"
+elifC = "elif"
+inputC = "input"
+returnC = "return"
 
 %state STRING
 
@@ -97,7 +108,7 @@ numeroE = {resta}? ("0" | {digitoN} {digito}*)
 
 <YYINITIAL> {
 /* identifiers */ 
-{ident}                   { return symbol(sym.ident); }
+{ident}                   { return symbol(sym.ident, yytext()); }
 
 /* literals */
 {finalExpre}            {return symbol(sym.finalExpre);}
@@ -110,8 +121,19 @@ numeroE = {resta}? ("0" | {digitoN} {digito}*)
 {comentarioL}           {return symbol(sym.comentarioL);}
 {comentApert}           {return symbol(sym.comentApert);}
 {comentCerrad}          {return symbol(sym.comentCerrad);}
-//{caracter}              {return symbol(sym.caracter);}
-//{string}                {return symbol(sym.STRING);}
+{caracter}              {return symbol(sym.caracter);}
+{string}                {return symbol(sym.STRING);}
+{coma}                  {return symbol(sym.coma);}
+{punto}                 {return symbol(sym.punto);}
+{mainC}                 {return symbol(sym.mainC);}
+{ifC}                   {return symbol(sym.ifC);}
+{elseC}                 {return symbol(sym.elseC);}
+{whileC}                {return symbol(sym.whileC);}
+{doC}                   {return symbol(sym.doC);}
+{forC}                  {return symbol(sym.forC);}
+{inputC}                {return symbol(sym.inputC);}
+{returnC}               {return symbol(sym.returnC);}
+{elifC}                 {return symbol(sym.elifC);}
 \"                      { string.setLength(0); yybegin(STRING); }
 /* operators */
 {equivalente}           { return symbol(sym.equivalente); }
@@ -133,7 +155,8 @@ numeroE = {resta}? ("0" | {digitoN} {digito}*)
 {mayor}                 { return symbol(sym.mayor); }
 {diferente}             { return symbol(sym.diferente); }
 {letra}                 {return symbol(sym.letra);}
-{numeroE}                {return symbol(sym.INTEGER_LITERAL);}
+{numeroE}                {return symbol(sym.INTEGER_LITERAL, yytext());}
+{numeroF}                {return symbol(sym.FLOAT_LITERAL, yytext());}
 {bool}                  {return symbol(sym.bool);}
 
 /* comments */

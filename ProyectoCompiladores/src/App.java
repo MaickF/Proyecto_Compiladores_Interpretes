@@ -24,12 +24,12 @@ public class App {
         scannerPath = basepath+"\\src\\pruebas\\pruebaLexer.txt";
         parserPath = basepath+"\\src\\pruebas\\pruebaParser.txt";
         mp = new MainProject();
-        //mp.ejercicioLexer(scannerPath);
-        mp.ejercicioParser(parserPath);
+        mp.ejercicioLexer(scannerPath);
+        //mp.ejercicioParser(parserPath);
     }
 
     public static void main(String[] args) throws Exception {
         generarParserLexer(); 
-        pruebas();
+        //pruebas();
     }
 }

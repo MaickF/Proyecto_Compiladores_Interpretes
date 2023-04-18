@@ -27,28 +27,41 @@ terminal            comentApert, comentCerrad, finalExpre, True, False;
 terminal            letra, ident, caracter, bool;
 terminal            menor, mayor, menorIgual, mayorIgual, diferente;
 terminal            aumento, equivalente, igual, suma, decremento, multiplicacion, resta, negacion, division, modulo, potencia, conjuncion, disyuncion;
-terminal Integer    NUMBER;
-terminal Integer    INTEGER_LITERAL;
+terminal            coma, punto, mainC, forC, doC, whileC, ifC, elseC, elifC, inputC, returnC;
+terminal            NUMBER;
+terminal            INTEGER_LITERAL;
+terminal            FLOAT_LITERAL;
 
 /* Non terminals */
 non terminal            expr_list;
-non terminal Integer    expr;      // used to store evaluated subexpressions
-non terminal tipo, tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac;
+non terminal            expr;      // used to store evaluated subexpressions
+non terminal tipo, tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac, lista, tipoArreglo;
+non terminal grupoArreglo;
 
 
 /* Precedences */
 precedence left suma, resta;
 precedence left multiplicacion;
 
+start with lista;
+
 /* The grammar rules */
 
 
-expr      ::= expr:e1 suma expr:e2         {: RESULT = e1+e2;       :}
-             | expr:e1 resta expr:e2        {: RESULT = e1-e2;       :}
-             | expr:e1 multiplicacion expr:e2        {: RESULT = e1*e2;       :}
-       | INTEGER_LITERAL:n	                     {: RESULT = n;           :}
+expr      ::= expr:e1 suma expr:e2               {: RESULT = e1+"+"+e2; System.out.println(RESULT); :
+             | expr:e1 resta expr:e2             {: RESULT = e1+"-"+e2;   System.out.println(RESULT); :}
+             | expr:e1 multiplicacion expr:e2    {: RESULT = e1+"*"+e2;     System.out.println(RESULT); :}
+             | INTEGER_LITERAL:n	             {: RESULT = n.toString(); System.out.println(RESULT); :}
              ;
 
+lista ::= grupoArreglo (coma grupoArreglo)*;
+
+//arregloSim ::= tipoArreglo id aperturaC numeroE cerraduraC;
+
+grupoArreglo ::= INTEGER_LITERAL
+                |FLOAT_LITERAL
+                |caracter
+                ;
 //Agrupaciones
 tipo ::= string
         |INT
@@ -56,6 +69,11 @@ tipo ::= string
         |FLOAT
         |bool
         ;
+
+tipoArreglo := tipoNum 
+              |CHAR
+              |STRING
+              ;
 
 tipoNum ::=  INT
             |FLOAT
