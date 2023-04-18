@@ -27,7 +27,7 @@ terminal            comentApert, comentCerrad, finalExpre, True, False;
 terminal            letra, ident, caracter, bool;
 terminal            menor, mayor, menorIgual, mayorIgual, diferente;
 terminal            aumento, equivalente, igual, suma, decremento, multiplicacion, resta, negacion, division, modulo, potencia, conjuncion, disyuncion;
-terminal            coma, punto, mainC, forC, doC, whileC, ifC, elseC, elifC, inputC, returnC;
+terminal            coma, punto, mainC, forC, doC, whileC, ifC, elseC, elifC, inputC, returnC, printC;
 terminal            NUMBER;
 terminal            INTEGER_LITERAL;
 terminal            FLOAT_LITERAL;
@@ -74,6 +74,18 @@ arregloAsig ::= arregloSim:a equivalente aperturaC lista:b cerraduraC {: RESULT 
 
 arregloInd ::= ident:a aperturaC INTEGER_LITERAL:b cerraduraC equivalente grupoArreglo:c {: RESULT = a+" = [" +b.toString()+"] = " + c;  System.out.println(RESULT); :};
 
+returnD ::= returnC ident:a {: RESULT = "return " + a; System.out.println(RESULT);:}
+            | returnC INTEGER_LITERAL:a {: RESULT = "return " + a.toString(); System.out.println(RESULT);:}
+            | returnC FLOAT_LITERAL:a {: RESULT = "return " + a.toString(); System.out.println(RESULT);:}
+            ;
+
+print ::= printC aperturaP string cerraduraP;
+input --> inputC aperturaP ident cerraduraP;
+
+param ::= param:l1 coma param:l2              {: RESULT = l1+","+l2; System.out.println(RESULT); :}
+         |tipo:a ident:b                        {: RESULT = n; System.out.println(RESULT); :}
+        ;
+        
 //Agrupaciones
 tipo ::= string
         |INT

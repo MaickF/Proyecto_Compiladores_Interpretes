@@ -92,6 +92,7 @@ ifC = "if"
 elseC = "else"
 elifC = "elif"
 inputC = "input"
+printC = "print"
 returnC = "return"
 
 %state STRING
@@ -134,6 +135,8 @@ returnC = "return"
 {inputC}                {return symbol(sym.inputC);}
 {returnC}               {return symbol(sym.returnC);}
 {elifC}                 {return symbol(sym.elifC);}
+{printC}                 {return symbol(sym.printC);}
+"in"                 {return symbol(sym.inC);}
 \"                      { string.setLength(0); yybegin(STRING); }
 /* operators */
 {equivalente}           { return symbol(sym.equivalente); }
