@@ -68,7 +68,7 @@ arregloInd --> id aperturaC numeroE cerraduraC equivalente grupoArreglo
 operando --> numeroE | numeroF | id |funcionAsig
 operacionNumSim --> operando operacionArit operando 
 operacionNum --> operacionNumSim (operacionArit  operando)*
-variableNum --> tipoNum id equivalente ((numeroE | numeroF) | operacionNum | id)
+variableNum --> numeroE | numeroF | operacionNum | id
 operacionSumUna --> aumento operando | aumento variableNum
 operacionResUna --> decremento operando | decremento variableNum
 operacionRacSim --> operando operacionRac operando
@@ -101,8 +101,8 @@ listaIdent --> id (\,id)*
 funcion --> tipoFuncion id aperturaP param? cerraduraP aperturaB bloque return cerraduraB
 funcionAsig --> id aperturaP listaIdent? cerraduraP
 
-declaracion --> (variable | variableAsig | operacionNum | operacionRac | arreglo | arregloAsig | arregloInd | input | print)finalExpre
-sentencia --> declaracion | bloqueIf | funcion | bloqueDoWhile | bloqueFor
+declaracion --> (variable | variableAsig | operacionNum | operacionRac | arregloSim | arregloAsig | arregloInd | input | print)finalExpre
+sentencia --> declaracion | bloqueIf | funcionAsig | bloqueDoWhile | bloqueFor
 bloque --> sentencia*
 return --> "return" (id | numeroE | numeroF)
 

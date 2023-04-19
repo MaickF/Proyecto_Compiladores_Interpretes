@@ -81,7 +81,7 @@ returnC = "return"
 letra  = [a-zA-Z_]
 ident  = {letra} ({letra}|\d)*
 caracter  = '[^']'
-string  = "\"[^\"\n]*\""
+string  = "string"
 digito  = [0-9]
 digitoN  = [1-9]
 bool  = {True} | {False}
@@ -91,8 +91,8 @@ mayor  = ">"
 menorIgual  = "<="
 mayorIgual  = ">="
 diferente  = "!="
-numeroE = {resta}? ("0" | {digitoN} {digito}*)
-numeroF = {resta}? ("0" "." {digito}* | {digitoN} {digito}*"."{digito}*)
+numeroE = /*{resta}?*/ ("0" | {digitoN} {digito}*)
+numeroF = /*{resta}?*/ ("0" "." {digito}* | {digitoN} {digito}*"."{digito}*)
 coma = ","
 punto = "."
 
@@ -101,10 +101,10 @@ punto = "."
 %%
 
 /* keywords */
-<YYINITIAL> "boolean"            { return symbol(sym.BOOL); }
+<YYINITIAL> "boolean"            { return symbol(sym.BOOLEAN); }
 <YYINITIAL> "int"                { return symbol(sym.INT); }
 <YYINITIAL> "char"               { return symbol(sym.CHAR); }
-<YYINITIAL> "string"             { return symbol(sym.string); }
+<YYINITIAL> {string}             { return symbol(sym.STRING); }
 <YYINITIAL> "float"              { return symbol(sym.FLOAT); }
 <YYINITIAL> "break"              { return symbol(sym.BREAK); }
 
@@ -121,8 +121,7 @@ punto = "."
 {comentarioL}           {return symbol(sym.comentarioL);}
 {comentApert}           {return symbol(sym.comentApert);}
 {comentCerrad}          {return symbol(sym.comentCerrad);}
-{caracter}              {return symbol(sym.caracter);}
-{string}                {return symbol(sym.STRING);}
+{caracter}              {return symbol(sym.caracter, yytext());}
 {coma}                  {return symbol(sym.coma);}
 {punto}                 {return symbol(sym.punto);}
 {mainC}                 {return symbol(sym.mainC);}
