@@ -3,6 +3,27 @@ package Proyecto;
 /* Simple +/-/* expression language; parser evaluates constant expressions on the fly*/
 import java_cup.runtime.*;
 
+/*Imports para la tabla de simbolos*/
+import java.util.MashMap;
+import java.util.Mash;
+import java.util.ArrayList;
+
+
+action code{:
+        HashMap<String, ArrayList<String>> symbols_table = new HashMap<String, ArrayList<String>>();
+        String current_table;
+        public void print_symbols_table(){
+                for (String key: symbols_table.keySet()) {
+                        System.out.printl("Tabla de simbolos: " + key):
+                        System.out.printl("Valores: ");
+                        for (String item: symbols_table.get(key)) {
+                                System.out.printl(item);
+                        }
+                        System.out.printl("")
+                }
+        }
+:}
+
 parser code {:
     // Connect this parser to a scanner!
     Lexer lex;
@@ -33,13 +54,12 @@ terminal            INTEGER_LITERAL;
 terminal            FLOAT_LITERAL;
 
 /* Non terminals */
-non terminal            expr_list;
-non terminal            expr;      // used to store evaluated subexpressions
-non terminal operando, operacionNum, operacionNumSim;
-non terminal tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac;
-non terminal grupoArreglo, lista, arregloSim, arregloAsig, arregloInd;
-non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr;
-non terminal variableAsig, variable,agrupacionVariable, declaracion;
+non terminal expr, bloqueIf, bloqueElif, ifD, elif, elseD, doD, whileD, bloqueDoWhile, bloque, funMain;      // used to store evaluated subexpressions
+non terminal operando, operacionNum, operacionNumSim, condicion, condicionSim, operacionRacNum, operandoBool;
+non terminal tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac, sentencia, variableBool;
+non terminal grupoArreglo, lista, arregloSim, arregloAsig, arregloInd, forD, bloqueFor, expNegada, comentarioBloque;
+non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr,funcion, variableNum, comentarioLineal;
+non terminal variableAsig, variable,agrupacionVariable, declaracion, operacionSumaUna, operacionRestaUna;
 
 
 /* Precedences */
@@ -48,131 +68,223 @@ precedence left multiplicacion, division, modulo;
 precedence left potencia;
 
 precedence left coma;
+
+//precedence left ident, operandoBool, funcionAsig;
 //precedence left operacionArit;
 
-start with declaracion;
+start with funcion;
 
 /* The grammar rules */
 
 
-expr      ::= expr:e1 suma expr:e2               {: RESULT = e1+"+"+e2; System.out.println(RESULT); :}
-             | expr:e1 resta expr:e2             {: RESULT = e1+"-"+e2;   System.out.println(RESULT); :}
-             | expr:e1 multiplicacion expr:e2    {: RESULT = e1+"*"+e2;     System.out.println(RESULT); :}
-             | INTEGER_LITERAL:n	             {: RESULT = n.toString(); System.out.println(RESULT); :}
+operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString(); :}
+            | FLOAT_LITERAL:a {: RESULT = a.toString(); :}
+            | ident:a {: RESULT = a; :}
+            | funcionAsig:a {: RESULT = a; :}
+            ;
+
+operacionNumSim ::= operando:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :};
+
+operacionNum ::= operacionNum:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :}
+                | operacionNumSim:a {: RESULT = a; :}
+                ;
+
+variableNum ::= INTEGER_LITERAL:d {: RESULT = d; :}
+            | FLOAT_LITERAL:d {: RESULT = d; :}
+            | operacionNum:d {: RESULT = d; :}
+            ;
+
+operacionSumaUna ::= aumento ident:a {: RESULT = "++" + a; :};
+operacionRestaUna ::= decremento ident:a {: RESULT = "--" + a; :};
+operacionRacNum ::= operando:a operacionRac:b operando:c {: RESULT = a+" "+b+" "+c ; :};
+
+
+operandoBool ::= expNegada:a {: RESULT = a; :}
+                |bool:a {: RESULT = a; :}
+                | operacionRacNum:a {: RESULT = a; :}
+                | ident:a {: RESULT = a; :}
+                | funcionAsig:a {: RESULT = a; :}
+                ;
+
+condicionSim ::= operandoBool:a  operacionLog:b operandoBool:c {: RESULT = a+" "+b+" "+c; :};
+
+condicion ::= condicion:a operacionLog:b operandoBool:c {: RESULT = a+" "+b+" "+c; :}
+            |condicionSim:a {: RESULT = a; :}
+            ;
+
+variableBool ::= expNegada:a {: RESULT = a; :}
+                |bool:a {: RESULT = a; :}
+                |operacionRacNum:a {: RESULT = a; :}
+                |condicion:a {: RESULT = a; :}
+                ;
+
+expNegada ::= negacion expNegada:a {: RESULT = "!"+a; :}
+             |negacion aperturaP condicion:a cerraduraP {: RESULT = "!"+"("+a+")"; :}
+             |negacion ident:a {: RESULT = a; :}
+             |negacion funcionAsig:a {: RESULT = a; :}
              ;
-operando ::=  INTEGER_LITERAL:a {: RESULT = a; System.out.println(RESULT); :}
-            | FLOAT_LITERAL:a {: RESULT = a; System.out.println(RESULT); :}
-            | ident:a {: RESULT = a; System.out.println(RESULT); :}
-            | funcionAsig:a {: RESULT = a; System.out.println(RESULT); :}
-            ;
 
-operacionNumSim ::= operando:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; System.out.println(RESULT); :};
+ifD ::= ifC aperturaP ident:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
+      |ifC aperturaP ident:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
+      |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
+      |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
+      ;
 
-operacionNum ::= operacionNum:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; System.out.println(RESULT); :}
-                | operacionNumSim:a {: RESULT = a; System.out.println(RESULT); :}
-                ;
-/*
-variableNum ::= tipoNum:a ident:b equivalente:c INTEGER_LITERAL:d {: RESULT = a+" "+b+" "+c+" "+d; System.out.println(RESULT); :};
-            | tipoNum:a ident:b equivalente:c FLOAT_LITERAL:d {: RESULT = a+" "+b+" "+c+" "+d; System.out.println(RESULT); :};
-            | tipoNum:a ident:b equivalente:c operacionNum:d {: RESULT = a+" "+b+" "+c+" "+d; System.out.println(RESULT); :};
-            | tipoNum:a ident:b equivalente:c ident:d {: RESULT = a+" "+b+" "+c+" "+d; System.out.println(RESULT); :};
-*/
-lista ::= lista:l1 coma lista:l2              {: RESULT = l1+","+l2; System.out.println(RESULT); :}
-         |grupoArreglo:n                        {: RESULT = n; System.out.println(RESULT); :}
+elif ::= elifC aperturaP ident:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "elif ("+a+"){"+b+"}"; :}
+      |elifC aperturaP ident:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "elif ("+a+"){"+b+"break$}"; :}
+      |elifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
+      |elifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "elif ("+a+"){"+b+"break$}"; :}
+      ;
+
+elseD ::= elseC aperturaB bloque:a cerraduraB {: RESULT = "else{"+a+"}"; :}
+        | elseC aperturaB bloque:a BREAK cerraduraB {: RESULT = "else{"+a+"break$}"; :}
         ;
 
-grupoArreglo ::= INTEGER_LITERAL {: RESULT = "prueba1"; :}
-                |FLOAT_LITERAL {: RESULT = "prueba2"; :}
-                |caracter {: RESULT = "prueba3"; :}
-                |STRING_LITERAL {: RESULT = "prueba4"; :}
-                ;
+bloqueElif ::= bloqueElif:a elif:b {: RESULT = a+" "+b; :}
+              |elif:a {: RESULT = a; :}
+              ;
 
-arregloSim ::= tipoVarArr ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = "tipo "+a+" ["+b.toString()+"]"; System.out.println(RESULT);:};
-
-arregloAsig ::= arregloSim:a equivalente aperturaC lista:b cerraduraC {: RESULT = a+" = [" +b+"]";  System.out.println(RESULT); :};
-
-arregloInd ::= ident:a aperturaC INTEGER_LITERAL:b cerraduraC equivalente grupoArreglo:c {: RESULT = a+" = [" +b.toString()+"] = " + c;  System.out.println(RESULT); :};
-
-returnD ::= returnC ident:a {: RESULT = "return " + a; System.out.println(RESULT);:}
-            | returnC INTEGER_LITERAL:a {: RESULT = "return " + a.toString(); System.out.println(RESULT);:}
-            | returnC FLOAT_LITERAL:a {: RESULT = "return " + a.toString(); System.out.println(RESULT);:}
+bloqueIf ::= ifD:a bloqueElif:b {: RESULT = a+" "+b; :}
+            |ifD:a elseD:b {: RESULT = a+" "+b; :}
+            |ifD:a bloqueElif:b elseD:c {: RESULT = a+" "+b+" "+c; :}
+            |ifD:a {: RESULT = a; :}
             ;
 
-print ::= printC aperturaP STRING_LITERAL:a cerraduraP {: RESULT = "print(" + a + ")"; System.out.println(RESULT);:};
-input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input(" + a + ")"; System.out.println(RESULT);:};
-
-param ::= param:a coma param:b              {: RESULT = a+","+b; System.out.println(RESULT); :}
-         |tipoVarArr:a ident:b                        {: RESULT = a+" "+b; System.out.println(RESULT); :}
-         |BOOLEAN:a ident:b                        {: RESULT = a+" "+b; System.out.println(RESULT); :}
+lista ::= lista:l1 coma lista:l2 {: RESULT = l1+","+l2; :}
+         |grupoArreglo:n {: RESULT = n; :}
         ;
 
-listaIdent ::= listaIdent:a coma listaIdent:b {: RESULT = a+","+b; System.out.println(RESULT); :}
-                |ident:a                      {: RESULT = a; System.out.println(RESULT); :}
+grupoArreglo ::= INTEGER_LITERAL:a {: RESULT = a; :}
+                |FLOAT_LITERAL:a {: RESULT = a; :}
+                |caracter:a {: RESULT = a; :}
+                |STRING_LITERAL:a {: RESULT = a; :}
                 ;
 
-funcionAsig ::= ident:a aperturaP listaIdent:b cerraduraP {: RESULT = a+"("+b+")"; System.out.println(RESULT); :}
-                |ident:a aperturaP cerraduraP        {: RESULT = a+"()"; System.out.println(RESULT); :}
-                ;
+arregloSim ::= tipoVarArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = c+" "+a+" ["+b.toString()+"]"; :};
 
-variable ::= tipoVarArr:a ident:b {: RESULT = a+ " " +b; System.out.println(RESULT); :}
-            |BOOLEAN:a ident:b {: RESULT = a+ " " +b; System.out.println(RESULT); :}
+arregloAsig ::= arregloSim:a equivalente aperturaC lista:b cerraduraC {: RESULT = a+" = ["+b+"]"; :};
+
+arregloInd ::= ident:a aperturaC INTEGER_LITERAL:b cerraduraC equivalente grupoArreglo:c {: RESULT = a+" = ["+b.toString()+"] = " + c; :};
+
+returnD ::= returnC ident:a finalExpre{: RESULT = "return " + a + "$"; :}
+            | returnC INTEGER_LITERAL:a finalExpre{: RESULT = "return " + a.toString()+ "$"; :}
+            | returnC FLOAT_LITERAL:a finalExpre{: RESULT = "return " + a.toString()+ "$"; :}
             ;
 
-declaracion ::= variable:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
-                |variableAsig:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
-                | operacionNum:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
-                //| operacionRac:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
-                |arregloSim:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
-                |arregloAsig:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
-                |arregloInd:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
-                |input:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
-                |print:a finalExpre {: RESULT = a+"$"; System.out.println(RESULT); :}
+print ::= printC aperturaP STRING_LITERAL:a cerraduraP {: RESULT = "print("+a+")"; :};
+input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
+
+param ::= param:a coma param:b {: RESULT = a+","+b; :}
+         |tipoVarArr:a ident:b {: RESULT = a+" "+b; :}
+         |BOOLEAN ident:a {: RESULT = "boolean "+a; :}
+        ;
+
+listaIdent ::= listaIdent:a coma listaIdent:b {: RESULT = a+","+b; :}
+                |ident:a                      {: RESULT = a; :}
                 ;
 
+funcionAsig ::= ident:a aperturaP listaIdent:b cerraduraP {: RESULT = a+"("+b+")"; :}
+                |ident:a aperturaP cerraduraP {: RESULT = a+"()"; :}
+                ;
 
-variableAsig ::= variable:a equivalente agrupacionVariable:b {: RESULT = a+" = "+b; System.out.println(RESULT); :};
+funcion ::= tipoFuncion:x ident:a aperturaP param:b cerraduraP aperturaB bloque:c returnD:d cerraduraB {: RESULT = x+" "+ a+ "("+b+")"+"{"+c+d+"}"; :}
+            |tipoFuncion:x ident:a aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: RESULT = x+" "+ a+ "()"+"{"+c+d+"}"; :}
+            ;
+variable ::= tipoVarArr:a ident:b {: RESULT = a+ " " +b; :}
+            |BOOLEAN ident:a {: RESULT = "boolean " +a; :}
+            ;
+
+declaracion ::= variable:a finalExpre {: RESULT = a+"$"; :}
+                |variableAsig:a finalExpre {: RESULT = a+"$"; :}
+                |operacionNum:a finalExpre {: RESULT = a+"$"; :}
+                |funcionAsig:a finalExpre {: RESULT = a+"$"; :}
+                |operacionRacNum:a finalExpre {: RESULT = a+"$"; :}
+                |arregloSim:a finalExpre {: RESULT = a+"$"; :}
+                |arregloAsig:a finalExpre {: RESULT = a+"$"; :}
+                |arregloInd:a finalExpre {: RESULT = a+"$"; :}
+                |input:a finalExpre {: RESULT = a+"$"; :}
+                |print:a finalExpre {: RESULT = a+"$"; :}
+                ;
+
+forD ::= forC aperturaP variableAsig:a inC ident:b operacionSumaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
+        |forC aperturaP ident:a inC ident:b operacionSumaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
+        |forC aperturaP variableAsig:a inC ident:b operacionRestaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
+        |forC aperturaP ident:a inC ident:b operacionRestaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
+        ;
+
+
+bloqueFor ::= forD:a aperturaB bloque:b cerraduraB {: RESULT = a+"{"+b+"}"; :}
+            | forD:a aperturaB bloque:b BREAK cerraduraB {: RESULT = a+"{"+b+"break$}"; :}
+            ;
+
+sentencia ::= declaracion:a {: RESULT = a; :}
+            | bloqueIf:a {: RESULT = a; :}
+            | bloqueDoWhile:a {: RESULT = a; :}
+            | bloqueFor:a {: RESULT = a; :}
+            ;
+
+bloque ::= bloque:a sentencia:b {: RESULT = a+" "+b; :}
+         |sentencia:a {: RESULT = a; :}
+         ;
+
+doD ::= doC aperturaB bloque:a cerraduraB {: RESULT = "do{"+a+"}"; :}
+        |doC aperturaB bloque:a BREAK cerraduraB {: RESULT = "do{"+a+"break$}"; :}
+        ;
+
+whileD ::= whileC aperturaP condicion:a cerraduraP {: RESULT = "while("+a+")"; :};
+
+
+bloqueDoWhile ::= doD:a whileD:b {: RESULT = a+b; :};
+
+funMain ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b cerraduraB {: RESULT = a+" main(){"+b+"}"; :}
+          | tipoFuncion:a mainC aperturaP param:b cerraduraP aperturaB bloque:c cerraduraB {: RESULT = a+" main("+b+"){"+c+"}"; :}
+          ;
+
+variableAsig ::= variable:a equivalente agrupacionVariable:b {: RESULT = a+" = "+b; :};
 //Agrupaciones
 
-agrupacionVariable ::= funcionAsig:a  {: RESULT = a; System.out.println(RESULT); :}
-                       | caracter:a  {: RESULT = a.toString(); System.out.println(RESULT); :}
-                       | STRING_LITERAL:a  {: RESULT = a; System.out.println(RESULT); :}
-                       | ident:a {: RESULT = a; System.out.println(RESULT); :}
+agrupacionVariable ::= funcionAsig:a  {: RESULT = a; :}
+                       | caracter:a  {: RESULT = a.toString(); :}
+                       | STRING_LITERAL:a  {: RESULT = a; :}
+                       | ident:a {: RESULT = a; :}
+                       | variableNum:a {: RESULT = a; :}
+                       | variableBool:a {: RESULT = a; :}
                        ;
-//(variableNum | variableB)
 
-tipoVarArr ::= STRING
-        |INT
-        |CHAR
-        |FLOAT
+comentarioLineal ::= comentarioL ident:a {: RESULT = "@"+a; :};
+comentarioBloque ::= comentApert ident:a comentCerrad {: RESULT = "/_ "+a+"_/"; :};
+
+tipoVarArr ::= STRING {: RESULT = "string"; :}
+        |INT {: RESULT = "int"; :}
+        |CHAR {: RESULT = "char"; :}
+        |FLOAT {: RESULT = "float"; :}
         ;
 
-tipoNum ::=  INT
-            |FLOAT
+tipoNum ::=  INT {: RESULT = "int"; :}
+            |FLOAT {: RESULT = "float"; :}
             ;
     
-tipoFuncion ::=  tipoNum
-                |bool
+tipoFuncion ::=  tipoNum:a {: RESULT = a; :}
+                |BOOLEAN {: RESULT = "boolean"; :}
                 ;
 
-operacionArit ::= suma
-                |resta 
-                |division
-                |multiplicacion 
-                |modulo
-                |potencia
+operacionArit ::= suma {: RESULT = "+"; :}
+                |resta {: RESULT = "-"; :}
+                |division {: RESULT = "/"; :}
+                |multiplicacion {: RESULT = "*"; :}
+                |modulo {: RESULT = "~"; :}
+                |potencia {: RESULT = "**"; :}
                 ;
 
-operacionRac ::= menor 
-                |mayor 
-                |menorIgual 
-                |mayorIgual 
-                |diferente 
-                |igual
+operacionRac ::= menor {: RESULT = "<"; :}
+                |mayor {: RESULT = ">"; :}
+                |menorIgual {: RESULT = "<="; :}
+                |mayorIgual {: RESULT = ">="; :}
+                |diferente {: RESULT = "!="; :}
+                |igual {: RESULT = "=="; :}
                 ;
 
-operacionLog ::= diferente
-                |igual 
-                |conjuncion 
-                |disyuncion
+operacionLog ::= conjuncion {: RESULT = "^"; :}
+                |disyuncion {: RESULT = "#"; :}
                 ;
 
