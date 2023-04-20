@@ -26,3 +26,8 @@ int prueba(boolean ayuda, float xd){
   }
   return carac$
 }
+
+
+int main(){
+  prueba(ayuda, xd)$
+}

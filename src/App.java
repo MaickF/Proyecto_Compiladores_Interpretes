@@ -29,7 +29,7 @@ public class App {
     }
 
     public static void main(String[] args) throws Exception {
-        //generarParserLexer(); 
-        pruebas();
+        generarParserLexer(); 
+        // pruebas();
     }
 }

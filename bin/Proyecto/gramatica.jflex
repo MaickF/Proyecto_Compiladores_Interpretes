@@ -106,7 +106,7 @@ punto = "."
 <YYINITIAL> "char"               { return symbol(sym.CHAR); }
 <YYINITIAL> {string}             { return symbol(sym.STRING); }
 <YYINITIAL> "float"              { return symbol(sym.FLOAT); }
-<YYINITIAL> "break"              { return symbol(sym.BREAK); }
+<YYINITIAL> "break$"              { return symbol(sym.BREAK); }
 
 <YYINITIAL> {
 
@@ -158,7 +158,7 @@ punto = "."
 {letra}                 {return symbol(sym.letra);}
 {numeroE}                {return symbol(sym.INTEGER_LITERAL, yytext());}
 {numeroF}                {return symbol(sym.FLOAT_LITERAL, yytext());}
-{bool}                  {return symbol(sym.bool);}
+{bool}                  {return symbol(sym.bool, yytext());}
 
 /* identifiers */ 
 {ident}                   { return symbol(sym.ident, yytext()); }
