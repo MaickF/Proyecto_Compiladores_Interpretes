@@ -39,6 +39,9 @@ EndOfLineComment     = "//" {InputCharacter}* {LineTerminator}?
 DocumentationComment = "/**" {CommentContent} "*"+ "/"
 CommentContent       = ( [^*] | \*+ [^/*] )*
 
+
+//Símbolos terminales para la gramática
+
 aumento = "++"
 decremento = "--"
 multiplicacion = "*"
@@ -99,6 +102,8 @@ punto = "."
 %state STRING
 
 %%
+
+//Definición de tokens
 
 /* keywords */
 <YYINITIAL> "boolean"            { return symbol(sym.BOOLEAN); }

@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Hash;
 import java.util.ArrayList;
 
-
+//Inicialización de l hasmap para desarrollar las tablas de símbolos
 action code{:
         HashMap<String, ArrayList<String>> symbols_table = new HashMap<String, ArrayList<String>>();
         String current_hash;
@@ -36,10 +36,12 @@ parser code {:
 :}
 
 /* define how to connect to the scanner! */
+
 init with {: :};
 scan with {: return lex.next_token(); :};
 
 /* Terminals (tokens returned by the scanner). */
+
 terminal            BOOLEAN, BREAK, INT, FLOAT, CHAR;
 terminal            STRING_LITERAL, LBLOQUE, RBLOQUE, STRING;
 terminal            SEMI, UMINUS, LPAREN, RPAREN;
@@ -54,6 +56,7 @@ terminal            INTEGER_LITERAL;
 terminal            FLOAT_LITERAL;
 
 /* Non terminals */
+
 non terminal expr, bloqueIf, bloqueElif, ifD, elif, elseD, doD, whileD, bloqueDoWhile, bloque, funMain;      // used to store evaluated subexpressions
 non terminal operando, operacionNum, operacionNumSim, condicion, condicionSim, operacionRacNum, operandoBool;
 non terminal tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac, sentencia, variableBool;
@@ -65,6 +68,7 @@ non terminal ini, inicio, main, funciones, iniFuncion, identFunc, opBloque, part
 
 
 /* Precedences */
+
 precedence left suma, resta;
 precedence left multiplicacion, division, modulo;
 precedence left potencia;
@@ -87,6 +91,7 @@ start with ini;
 //                 :};
 
 
+//Parte inicial de una función compuesta de un tipo y un identificador, ejemplo: "int miFuncion"
 identFunc ::= tipoFuncion:a ident:b 
                 {: 
                         System.out.println("/_Nueva tabla de simbolos_/:  " + b);
@@ -98,6 +103,7 @@ identFunc ::= tipoFuncion:a ident:b
                         symbols_table.put(current_hash, funcionMain);
                 :};
 
+//Parte inicial de la función main compuesta del terminal main y un tipo
 identMain ::= tipoFuncion:a mainC
                 {: 
                         System.out.println("/_Nueva tabla de simbolos_/:  " + "main");
@@ -109,48 +115,60 @@ identMain ::= tipoFuncion:a mainC
                         symbols_table.put(current_hash, funcionMain);
                 :};
 
+//Definición de una función común, con posibilidad de contener parametros o no
 iniFuncion ::= identFunc:a aperturaP param:b cerraduraP aperturaB:c bloque:d returnD:e cerraduraB {: RESULT = a+"("+b+") {"+d+e+"}"; :}
                 | identFunc:a aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: RESULT = a+"() {"+b+c+"}"; :}
                 ;
 
+//Definición de un bloque que agrupa múltiples funciones
 funciones ::= funciones iniFuncion:a {: System.out.println("/_Fin de tabla de simbolos1: _/"+ a); :}
                 | iniFuncion:a {: System.out.println("/_Fin de tabla de simbolos2: _/"+ a); :}
                 ;
 
+//Definición de la función main
 main ::= identMain aperturaP cerraduraP aperturaB bloque cerraduraB {: System.out.println("/_Fin de tabla de simbolos3: _/ : main"); :};
 
+//Agrupación de múltiples funciones, entre las que debe estar la función main
 inicio ::= funciones main
                 | main
                 ;
 
+//Símbolo inicial del programa
 ini ::= inicio {: print_symbols_table(); :};
 
-
-
-
-
+//Operando numérico que posteriormente podrá ser utilizado para operaciones númericas y racionales
 operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString(); :}
             | FLOAT_LITERAL:a {: RESULT = a.toString(); :}
             | ident:a {: RESULT = a; :}
             | funcionAsig:a {: RESULT = a; :}
             ;
 
+//operación aritmétrica simple, compuesta de dos operandos
 operacionNumSim ::= operando:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :};
+
 
 operacionNum ::= operacionNum:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :}
                 | operacionNumSim:a {: RESULT = a; :}
                 ;
 
+//Operación aritmétrica compleja compuesta de una cantidad de operandos indeterminada
+
+//Expresiones aritmétricas capaces de ser asignadas a una variable
 variableNum ::= INTEGER_LITERAL:d {: RESULT = d; :}
             | FLOAT_LITERAL:d {: RESULT = d; :}
             | operacionNum:d {: RESULT = d; :}
             ;
 
+//Aumento unitario de una variable
 operacionSumaUna ::= aumento ident:a {: RESULT = "++" + a; :};
+
+//Decremento unitario de una variable
 operacionRestaUna ::= decremento ident:a {: RESULT = "--" + a; :};
+
+//operacion racional de dos operandos númericos
 operacionRacNum ::= operando:a operacionRac:b operando:c {: RESULT = a+" "+b+" "+c ; :};
 
-
+//Operando booleanos que podrá ser utilizado después para operaciones booleanas
 operandoBool ::= expNegada:a {: RESULT = a; :}
                 |bool:a {: RESULT = a; :}
                 | operacionRacNum:a {: RESULT = a; :}
@@ -158,91 +176,106 @@ operandoBool ::= expNegada:a {: RESULT = a; :}
                 | funcionAsig:a {: RESULT = a; :}
                 ;
 
+//Operación lógica simple de dos operandos booleanos
 condicionSim ::= operandoBool:a  operacionLog:b operandoBool:c {: RESULT = a+" "+b+" "+c; :};
 
+//Operación lógica compleja de una cantidad indefinida de operandos booleanos
 condicion ::= condicion:a operacionLog:b operandoBool:c {: RESULT = a+" "+b+" "+c; :}
             |condicionSim:a {: RESULT = a; :}
             ;
-
+//tipos de expresiones booleanas capaces de ser asignadas a una variable
 variableBool ::= expNegada:a {: RESULT = a; :}
                 |bool:a {: RESULT = a; :}
                 |operacionRacNum:a {: RESULT = a; :}
                 |condicion:a {: RESULT = a; :}
                 ;
-
+//Expresión booleana negada
 expNegada ::= negacion expNegada:a {: RESULT = "!"+a; :}
              |negacion aperturaP condicion:a cerraduraP {: RESULT = "!"+"("+a+")"; :}
              |negacion ident:a {: RESULT = a; :}
              |negacion funcionAsig:a {: RESULT = a; :}
              ;
 
+//Definición de una expresión if y sus variantes
 ifD ::= ifC aperturaP ident:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
       |ifC aperturaP ident:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
       |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
       |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
       ;
 
+//Definición de una expresión elif y sus variantes
 elif ::= elifC aperturaP ident:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "elif ("+a+"){"+b+"}"; :}
       |elifC aperturaP ident:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "elif ("+a+"){"+b+"break$}"; :}
       |elifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
       |elifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "elif ("+a+"){"+b+"break$}"; :}
       ;
 
+//Definición de una expresión else
 elseD ::= elseC aperturaB bloque:a cerraduraB {: RESULT = "else{"+a+"}"; :}
         | elseC aperturaB bloque:a BREAK cerraduraB {: RESULT = "else{"+a+"break$}"; :}
         ;
 
+//Definición de un bloque elif, el cual cumple con la función de permitir asignar múltiples expresiones elif después de una expresión if
 bloqueElif ::= bloqueElif:a elif:b {: RESULT = a+" "+b; :}
               |elif:a {: RESULT = a; :}
               ;
 
+//Definición de un bloque if, el cual puede contar con múltiples expresiones elif y con una expresión else
 bloqueIf ::= ifD:a bloqueElif:b {: RESULT = a+" "+b; :}
             |ifD:a elseD:b {: RESULT = a+" "+b; :}
             |ifD:a bloqueElif:b elseD:c {: RESULT = a+" "+b+" "+c; :}
             |ifD:a {: RESULT = a; :}
             ;
-
+//Lista simple de elementos, ejemplo: 1,2,3,4,4
 lista ::= lista:l1 coma lista:l2 {: RESULT = l1+","+l2; :}
          |grupoArreglo:n {: RESULT = n; :}
         ;
 
+//Grupo de valores capaces de ser asignados a un arreglo
 grupoArreglo ::= INTEGER_LITERAL:a {: RESULT = a; :}
                 |FLOAT_LITERAL:a {: RESULT = a; :}
                 |caracter:a {: RESULT = a; :}
                 |STRING_LITERAL:a {: RESULT = a; :}
                 ;
 
+//Declaración de un arreglo con tamaño estático, sin ser inicializado
 arregloSim ::= tipoVarArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = c+" "+a+" ["+b.toString()+"]"; :};
 
+//Inicialización de un arreglo a una lista de valores
 arregloAsig ::= arregloSim:a equivalente aperturaC lista:b cerraduraC {: RESULT = a+" = ["+b+"]"; :};
 
+//Asignación de un indice del arreglo a un valor
 arregloInd ::= ident:a aperturaC INTEGER_LITERAL:b cerraduraC equivalente grupoArreglo:c {: RESULT = a+" = ["+b.toString()+"] = " + c; :};
 
+//Definición del return
 returnD ::= returnC ident:a finalExpre{: RESULT = "return " + a + "$"; :}
             | returnC INTEGER_LITERAL:a finalExpre{: RESULT = "return " + a.toString()+ "$"; :}
             | returnC FLOAT_LITERAL:a finalExpre{: RESULT = "return " + a.toString()+ "$"; :}
             ;
 
+//Definición de la función print
 print ::= printC aperturaP STRING_LITERAL:a cerraduraP {: RESULT = "print("+a+")"; :};
+
+//Definición de la función input
 input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
 
+//Definición de uno o más parametros tipados y separados por coma 
 param ::= param:a coma param:b {: RESULT = a+","+b; :}
          |tipoVarArr:a ident:b {: RESULT = a+" "+b; :}
          |BOOLEAN ident:a {: RESULT = "boolean "+a; :}
         ;
 
+/Definición de una lista de identificadores
 listaIdent ::= listaIdent:a coma listaIdent:b {: RESULT = a+","+b; :}
                 |ident:a                      {: RESULT = a; :}
                 ;
 
+//Definición de una función capaz de ser asignada, ejemplo: "miFuncion()"
 funcionAsig ::= ident:a aperturaP listaIdent:b cerraduraP {: RESULT = a+"("+b+")"; :}
                 |ident:a aperturaP cerraduraP {: RESULT = a+"()"; :}
                 ;
 
-// funcion ::= tipoFuncion:x ident:a aperturaP param:b cerraduraP aperturaB bloque:c returnD:d cerraduraB {: RESULT = x+" "+ a+ "("+b+")"+"{"+c+d+"}"; :}
-//             |tipoFuncion:x ident:a aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: RESULT = x+" "+ a+ "()"+"{"+c+d+"}"; :}
-//             ;
-
+//Definición de la parte inicial de una variable, compuesta de un tipo y un identificador
 variable ::= tipoVarArr:a ident:b 
                 {: 
                         System.out.println("PARSER: identificardor: " + b);
@@ -255,6 +288,7 @@ variable ::= tipoVarArr:a ident:b
                 :}
             ;
 
+//Agrupación de expresiones capaces de ser declaradas dentro de un bloque especializado o función
 declaracion ::= variable:a finalExpre {: RESULT = a+"$"; :}
                 |variableAsig:a finalExpre {: RESULT = a+"$"; :}
                 |operacionNum:a finalExpre {: RESULT = a+"$"; :}
@@ -267,6 +301,7 @@ declaracion ::= variable:a finalExpre {: RESULT = a+"$"; :}
                 |print:a finalExpre {: RESULT = a+"$"; :}
                 ;
 
+//Definición de una expresión for
 forD ::= forC aperturaP variableAsig:a inC ident:b operacionSumaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
         |forC aperturaP ident:a inC ident:b operacionSumaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
         |forC aperturaP variableAsig:a inC ident:b operacionRestaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
@@ -274,40 +309,39 @@ forD ::= forC aperturaP variableAsig:a inC ident:b operacionSumaUna:c cerraduraP
         ;
 
 
+//Definición del bloque for, compuesta por su inicialización y un bloque
 bloqueFor ::= forD:a aperturaB bloque:b cerraduraB {: RESULT = a+"{"+b+"}"; :}
             | forD:a aperturaB bloque:b BREAK cerraduraB {: RESULT = a+"{"+b+"break$}"; :}
             ;
 
+//Agrupación de expresionesy bloques especializados capaces de ser declaradas dentro de un bloque
 sentencia ::= declaracion:a {: RESULT = a; :}
             | bloqueIf:a {: RESULT = a; :}
             | bloqueDoWhile:a {: RESULT = a; :}
             | bloqueFor:a {: RESULT = a; :}
             ;
 
+//Bloque de expresiones o bloques especializados
 bloque ::= bloque:a sentencia:b {: RESULT = a+" "+b; System.out.println(RESULT); :}
          | sentencia:a {: RESULT = a; :}
          ;
 
-
-
-
-
+//Bloque do
 doD ::= doC aperturaB bloque:a cerraduraB {: RESULT = "do{"+a+"}"; :}
         |doC aperturaB bloque:a BREAK cerraduraB {: RESULT = "do{"+a+"break$}"; :}
         ;
 
+//Definición de expresión while
 whileD ::= whileC aperturaP condicion:a cerraduraP {: RESULT = "while("+a+")"; :};
 
-
+//Definición de bloque do-While
 bloqueDoWhile ::= doD:a whileD:b {: RESULT = a+""+b; :};
 
-// funMain ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b cerraduraB {: RESULT = a+" main(){"+b+"}"; :}
-//           | tipoFuncion:a mainC aperturaP param:b cerraduraP aperturaB bloque:c cerraduraB {: RESULT = a+" main("+b+"){"+c+"}"; :}
-//           ;
-
+//Variable compuesta por su declaració e inicialización
 variableAsig ::= variable equivalente agrupacionVariable:a {: System.out.println("PARSER: sentencia: " + a + "\n"); :};
 //Agrupaciones
 
+//Grupo de expresiones capaces de ser asignadas a una variable
 agrupacionVariable ::= funcionAsig:a  {: RESULT = a; :}
                        | caracter:a  {: RESULT = a.toString(); :}
                        | STRING_LITERAL:a  {: RESULT = a; :}
@@ -316,23 +350,30 @@ agrupacionVariable ::= funcionAsig:a  {: RESULT = a; :}
                        | variableBool:a {: RESULT = a; :}
                        ;
 
+//Comentario de linea
 comentarioLineal ::= comentarioL ident:a {: RESULT = "@"+a; :};
+
+//Bloque de comentarios
 comentarioBloque ::= comentApert ident:a comentCerrad {: RESULT = "/_ "+a+"_/"; :};
 
+//Agrupación de tipos posibles para variables y arreglos
 tipoVarArr ::= STRING {: RESULT = "string"; :}
         |INT {: RESULT = "int"; :}
         |CHAR {: RESULT = "char"; :}
         |FLOAT {: RESULT = "float"; :}
         ;
 
+//Agrupación de tipos númericos
 tipoNum ::=  INT {: RESULT = "int"; :}
             |FLOAT {: RESULT = "float"; :}
             ;
-    
+
+//Agrupación de tipos para una función    
 tipoFuncion ::=  tipoNum:a {: RESULT = a; :}
                 |BOOLEAN {: RESULT = "boolean"; :}
                 ;
 
+//Agrupación de operadores aritmétricos
 operacionArit ::= suma {: RESULT = "+"; :}
                 |resta {: RESULT = "-"; :}
                 |division {: RESULT = "/"; :}
@@ -341,6 +382,7 @@ operacionArit ::= suma {: RESULT = "+"; :}
                 |potencia {: RESULT = "**"; :}
                 ;
 
+//Agrupación de operadores racionales
 operacionRac ::= menor {: RESULT = "<"; :}
                 |mayor {: RESULT = ">"; :}
                 |menorIgual {: RESULT = "<="; :}
@@ -349,6 +391,7 @@ operacionRac ::= menor {: RESULT = "<"; :}
                 |igual {: RESULT = "=="; :}
                 ;
 
+//Agrupación de operadores lógicos
 operacionLog ::= conjuncion {: RESULT = "^"; :}
                 |disyuncion {: RESULT = "#"; :}
                 ;
