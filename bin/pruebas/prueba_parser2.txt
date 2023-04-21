@@ -1,0 +1,22 @@
+int residuo (int num){
+        int num = 1$
+        return num$
+    }
+
+int main() {
+    int temp = 12 ** residuo(num)$
+    if (temp == 12 # !xd)
+        {
+            int temp1 = read()$ 
+            int temp2 = temp - temp$
+            break$
+        }
+    else
+        { 
+            int temp3 = var+23$
+        }
+    string miString = "num"$
+    int numero = 45 / 34 ~ 4$
+    print("numero")$
+}
+

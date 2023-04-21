@@ -14,12 +14,12 @@ action code{:
         String current_hash;
         public void print_symbols_table(){
                 for (String key: symbols_table.keySet()) {
-                        System.out.printl("Tabla de simbolos: " + key);
-                        System.out.printl("Valores: ");
+                        System.out.println("Tabla de simbolos: " + key);
+                        System.out.println("Valores: ");
                         for (String item: symbols_table.get(key)) {
-                                System.out.printl(item);
+                                System.out.println(item);
                         }
-                        System.out.printl("");
+                        System.out.println("");
                 }
         }
 :}
@@ -61,7 +61,7 @@ non terminal grupoArreglo, lista, arregloSim, arregloAsig, arregloInd, forD, blo
 // non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr,funcion, variableNum, comentarioLineal;
 non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr, variableNum, comentarioLineal;
 non terminal variableAsig, variable,agrupacionVariable, declaracion, operacionSumaUna, operacionRestaUna;
-non terminal ini, inicio, main, funciones, iniFuncion, identFunc, opBloque, creacionAsig, creacion, partIzqCreacion;
+non terminal ini, inicio, main, funciones, iniFuncion, identFunc, opBloque, partIzqCreacion, identMain;
 
 
 /* Precedences */
@@ -80,44 +80,44 @@ precedence left coma;
 start with ini;
 /* The grammar rules */
 
-partIzqCreacion ::= tipoVarArr:a ident:b 
-                {: 
-                        System.out.print("PARSER: identificardor: " + b.toString());
-                        symbols_table.get(current_hash).add(b.toString() + ": " + a.toString());
-                :};
+// partIzqCreacion ::= tipoVarArr:a ident:b 
+//                 {: 
+//                         System.out.print("PARSER: identificardor: " + b.toString());
+//                         symbols_table.get(current_hash).add(b.toString() + ": " + a.toString());
+//                 :};
 
-creacion :: partIzqCreacion;
-
-creacionAsig ::= partIzqCreacion equivalencia sentencia:a {: System.out.print("PARSER: sentencia: " + a); :};
-
-opBloque ::= creacion
-        | creacionAsig
-        | sentencia:a {: System.out.print("PARSER: sentencia: " + a); :}
-        ;
 
 identFunc ::= tipoFuncion:a ident:b 
                 {: 
-                        System.out.print("/_Nueva tabla de simbolos_/" + b.toString());
+                        System.out.println("/_Nueva tabla de simbolos_/:  " + b);
                         String tipoTabla = "main";
-                        if (b.toString().equals("main"))
-                                tipoTabla = "Tipo: main: " + a.toString();
-                        else
-                                tipoTabla = "Tipo: funcion: " + a.toString();
+                        tipoTabla = "Tipo: funcion: " + a;
                         ArrayList<String> funcionMain = new ArrayList<String>();
                         current_hash = b.toString();
                         funcionMain.add(tipoTabla);
                         symbols_table.put(current_hash, funcionMain);
                 :};
 
-iniFuncion ::= identFunc aperturaP param:b cerraduraP aperturaB bloque:c returnD:d cerraduraB
-                | identFunc aperturaP cerraduraP aperturaB bloque:c returnD:d 
+identMain ::= tipoFuncion:a mainC
+                {: 
+                        System.out.println("/_Nueva tabla de simbolos_/:  " + "main");
+                        String tipoTabla = "main";
+                        tipoTabla = "Tipo: main: " + a;
+                        ArrayList<String> funcionMain = new ArrayList<String>();
+                        current_hash = "main";
+                        funcionMain.add(tipoTabla);
+                        symbols_table.put(current_hash, funcionMain);
+                :};
+
+iniFuncion ::= identFunc:a aperturaP param:b cerraduraP aperturaB:c bloque:d returnD:e cerraduraB {: RESULT = a+"("+b+") {"+d+e+"}"; :}
+                | identFunc:a aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: RESULT = a+"() {"+b+c+"}"; :}
                 ;
 
-funciones ::= funciones iniFuncion:a {: System.out.print("/_Fin de tabla de simbolos: _/"+ a + "\n\n"); :}
-                | iniFuncion:a {: System.out.print("/_Fin de tabla de simbolos: _/"+ a + "\n\n"); :}
+funciones ::= funciones iniFuncion:a {: System.out.println("/_Fin de tabla de simbolos1: _/"+ a); :}
+                | iniFuncion:a {: System.out.println("/_Fin de tabla de simbolos2: _/"+ a); :}
                 ;
 
-main ::= identFunc:a aperturaP cerraduraP aperturaB bloque cerraduraB {: System.out.print("/_Fin de tabla de simbolos: _/"+ a + "\n\n"); :};
+main ::= identMain aperturaP cerraduraP aperturaB bloque cerraduraB {: System.out.println("/_Fin de tabla de simbolos3: _/ : main"); :};
 
 inicio ::= funciones main
                 | main
@@ -243,8 +243,16 @@ funcionAsig ::= ident:a aperturaP listaIdent:b cerraduraP {: RESULT = a+"("+b+")
 //             |tipoFuncion:x ident:a aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: RESULT = x+" "+ a+ "()"+"{"+c+d+"}"; :}
 //             ;
 
-variable ::= tipoVarArr:a ident:b {: RESULT = a+ " " +b; :}
-            |BOOLEAN ident:a {: RESULT = "boolean " +a; :}
+variable ::= tipoVarArr:a ident:b 
+                {: 
+                        System.out.println("PARSER: identificardor: " + b);
+                        symbols_table.get(current_hash).add(b.toString() + ": " + a.toString());
+                :}
+            |BOOLEAN ident:a 
+                {: 
+                System.out.println("PARSER: identificardor: boolean");
+                symbols_table.get(current_hash).add("boolean: " + a.toString());
+                :}
             ;
 
 declaracion ::= variable:a finalExpre {: RESULT = a+"$"; :}
@@ -276,9 +284,13 @@ sentencia ::= declaracion:a {: RESULT = a; :}
             | bloqueFor:a {: RESULT = a; :}
             ;
 
-bloque ::= bloque:a opBloque:b {: RESULT = a+" "+b; :}
-         |opBloque:a {: RESULT = a; :}
+bloque ::= bloque:a sentencia:b {: RESULT = a+" "+b; System.out.println(RESULT); :}
+         | sentencia:a {: RESULT = a; :}
          ;
+
+
+
+
 
 doD ::= doC aperturaB bloque:a cerraduraB {: RESULT = "do{"+a+"}"; :}
         |doC aperturaB bloque:a BREAK cerraduraB {: RESULT = "do{"+a+"break$}"; :}
@@ -287,13 +299,13 @@ doD ::= doC aperturaB bloque:a cerraduraB {: RESULT = "do{"+a+"}"; :}
 whileD ::= whileC aperturaP condicion:a cerraduraP {: RESULT = "while("+a+")"; :};
 
 
-bloqueDoWhile ::= doD:a whileD:b {: RESULT = a+b; :};
+bloqueDoWhile ::= doD:a whileD:b {: RESULT = a+""+b; :};
 
 // funMain ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b cerraduraB {: RESULT = a+" main(){"+b+"}"; :}
 //           | tipoFuncion:a mainC aperturaP param:b cerraduraP aperturaB bloque:c cerraduraB {: RESULT = a+" main("+b+"){"+c+"}"; :}
 //           ;
 
-variableAsig ::= variable:a equivalente agrupacionVariable:b {: RESULT = a+" = "+b; :};
+variableAsig ::= variable equivalente agrupacionVariable:a {: System.out.println("PARSER: sentencia: " + a + "\n"); :};
 //Agrupaciones
 
 agrupacionVariable ::= funcionAsig:a  {: RESULT = a; :}

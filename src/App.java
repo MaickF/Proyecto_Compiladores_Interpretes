@@ -22,14 +22,14 @@ public class App {
         MainProject mp;
         basepath = System.getProperty("user.dir");
         scannerPath = basepath+"\\src\\pruebas\\pruebaLexer.txt";
-        parserPath = basepath+"\\src\\pruebas\\pruebaParser.txt";
+        parserPath = basepath+"\\src\\pruebas\\prueba_parser2.txt";
         mp = new MainProject();
         //mp.ejercicioLexer(scannerPath);
         mp.ejercicioParser(parserPath);
     }
 
     public static void main(String[] args) throws Exception {
-        generarParserLexer(); 
-        // pruebas();
+        //generarParserLexer(); 
+        pruebas();
     }
 }
