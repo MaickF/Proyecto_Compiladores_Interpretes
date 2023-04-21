@@ -2,6 +2,8 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 public class App {
+
+    //Función generadora del lexer y el parser con rutas estáticas
     public static void generarParserLexer() throws Exception{
         String basepath, scannerPath, parserPath;
         MainProject mp;
@@ -17,6 +19,7 @@ public class App {
         Files.move(Paths.get(basepath+"\\parser.java"), Paths.get(basepath+"\\src\\Proyecto\\parser.java"));
     }
 
+    //Método para invocar a la función que realiza las pruebas del parser y lexer
     public static void pruebas()throws Exception{
         String basepath, scannerPath, parserPath;
         MainProject mp;
