@@ -645,7 +645,7 @@ class CUP$parser$actions {
         String current_hash;
         public void print_symbols_table(){
                 for (String key: symbols_table.keySet()) {
-                        System.out.println("Tabla de simbolos: " + key);
+                        System.out.println("Tabla de simbolos: \n" + key);
                         System.out.println("Valores: ");
                         for (String item: symbols_table.get(key)) {
                                 System.out.println(item);
