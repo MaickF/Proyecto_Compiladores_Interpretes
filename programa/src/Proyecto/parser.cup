@@ -64,8 +64,8 @@ non terminal grupoArreglo, lista, arregloSim, arregloAsig, arregloInd, forD, blo
 // non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr,funcion, variableNum, comentarioLineal;
 non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr, variableNum, comentarioLineal;
 non terminal variableAsig, variable,agrupacionVariable, declaracion, operacionSumaUna, operacionRestaUna;
-non terminal ini, inicio, main, funciones, iniFuncion, identFunc, opBloque, partIzqCreacion, identMain;
-
+non terminal ini, inicio, main, funciones, iniFuncion, identFunc, opBloque, partIzqCreacion, identMain, listaParam;
+non terminal asignacion;
 
 /* Precedences */
 
@@ -126,10 +126,12 @@ funciones ::= funciones iniFuncion:a {: System.out.println("/_Fin de tabla de si
                 ;
 
 //Definición de la función main
-main ::= identMain aperturaP cerraduraP aperturaB bloque cerraduraB {: System.out.println("/_Fin de tabla de simbolos3: _/ : main"); :};
+main ::= identMain aperturaP cerraduraP aperturaB bloque returnD cerraduraB {: System.out.println("/_Fin de tabla de simbolos3: _/ : main"); :};
 
 //Agrupación de múltiples funciones, entre las que debe estar la función main
 inicio ::= funciones main
+                | main funciones
+                | funciones main funciones
                 | main
                 ;
 
@@ -141,13 +143,17 @@ operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString(); :}
             | FLOAT_LITERAL:a {: RESULT = a.toString(); :}
             | ident:a {: RESULT = a; :}
             | funcionAsig:a {: RESULT = a; :}
+            | operacionSumaUna
+            | operacionRestaUna
             ;
 
 //operación aritmétrica simple, compuesta de dos operandos
-operacionNumSim ::= operando:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :};
+operacionNumSim ::= operando:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :}
+                | aperturaP operando:a operacionArit:b operando:c cerraduraP {: RESULT = "("+a+" "+b+" "+c+")"; :};
 
 
 operacionNum ::= operacionNum:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :}
+                | aperturaP operacionNum:a operacionArit:b operando:c cerraduraP {: RESULT = "("+a+" "+b+" "+c+")"; :}
                 | operacionNumSim:a {: RESULT = a; :}
                 ;
 
@@ -169,7 +175,8 @@ operacionRestaUna ::= decremento ident:a {: RESULT = "--" + a; :};
 operacionRacNum ::= operando:a operacionRac:b operando:c {: RESULT = a+" "+b+" "+c ; :};
 
 //Operando booleanos que podrá ser utilizado después para operaciones booleanas
-operandoBool ::= expNegada:a {: RESULT = a; :}
+operandoBool ::= aperturaP operandoBool:a cerraduraP {: RESULT = "("+a+")"; :}
+                |expNegada:a {: RESULT = a; :}
                 |bool:a {: RESULT = a; :}
                 | operacionRacNum:a {: RESULT = a; :}
                 | ident:a {: RESULT = a; :}
@@ -183,6 +190,7 @@ condicionSim ::= operandoBool:a  operacionLog:b operandoBool:c {: RESULT = a+" "
 condicion ::= condicion:a operacionLog:b operandoBool:c {: RESULT = a+" "+b+" "+c; :}
             |condicionSim:a {: RESULT = a; :}
             ;
+
 //tipos de expresiones booleanas capaces de ser asignadas a una variable
 variableBool ::= expNegada:a {: RESULT = a; :}
                 |bool:a {: RESULT = a; :}
@@ -197,8 +205,8 @@ expNegada ::= negacion expNegada:a {: RESULT = "!"+a; :}
              ;
 
 //Definición de una expresión if y sus variantes
-ifD ::= ifC aperturaP ident:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
-      |ifC aperturaP ident:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
+ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
+      |ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
       |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
       |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
       ;
@@ -238,6 +246,13 @@ grupoArreglo ::= INTEGER_LITERAL:a {: RESULT = a; :}
                 |STRING_LITERAL:a {: RESULT = a; :}
                 ;
 
+listaParam ::= listaParam:a coma listaParam:b {: RESULT = a+","+b; :}
+                | lista:n {: RESULT = n; :}
+                | listaIdent:n {: RESULT = n; :}
+                ;
+
+asignacion ::= ident:a equivalente agrupacionVariable:b {: RESULT = a+"="+b; :};
+
 //Declaración de un arreglo con tamaño estático, sin ser inicializado
 arregloSim ::= tipoVarArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = c+" "+a+" ["+b.toString()+"]"; :};
 
@@ -265,13 +280,13 @@ param ::= param:a coma param:b {: RESULT = a+","+b; :}
          |BOOLEAN ident:a {: RESULT = "boolean "+a; :}
         ;
 
-/Definición de una lista de identificadores
+//Definición de una lista de identificadores
 listaIdent ::= listaIdent:a coma listaIdent:b {: RESULT = a+","+b; :}
                 |ident:a                      {: RESULT = a; :}
                 ;
 
 //Definición de una función capaz de ser asignada, ejemplo: "miFuncion()"
-funcionAsig ::= ident:a aperturaP listaIdent:b cerraduraP {: RESULT = a+"("+b+")"; :}
+funcionAsig ::= ident:a aperturaP listaParam:b cerraduraP {: RESULT = a+"("+b+")"; :}
                 |ident:a aperturaP cerraduraP {: RESULT = a+"()"; :}
                 ;
 
@@ -291,6 +306,7 @@ variable ::= tipoVarArr:a ident:b
 //Agrupación de expresiones capaces de ser declaradas dentro de un bloque especializado o función
 declaracion ::= variable:a finalExpre {: RESULT = a+"$"; :}
                 |variableAsig:a finalExpre {: RESULT = a+"$"; :}
+                |asignacion:a finalExpre {: RESULT = a+"$"; :}
                 |operacionNum:a finalExpre {: RESULT = a+"$"; :}
                 |funcionAsig:a finalExpre {: RESULT = a+"$"; :}
                 |operacionRacNum:a finalExpre {: RESULT = a+"$"; :}
