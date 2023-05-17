@@ -126,7 +126,8 @@ funciones ::= funciones iniFuncion:a {: System.out.println("/_Fin de tabla de si
                 ;
 
 //Definición de la función main
-main ::= identMain aperturaP cerraduraP aperturaB bloque cerraduraB {: System.out.println("/_Fin de tabla de simbolos3: _/ : main"); :};
+main ::= identMain aperturaP cerraduraP aperturaB bloque returnD cerraduraB {: System.out.println("/_Fin de tabla de simbolos3: _/ : main"); :};
+// Poner tipo de return
 
 //Agrupación de múltiples funciones, entre las que debe estar la función main
 inicio ::= funciones main
@@ -265,7 +266,7 @@ param ::= param:a coma param:b {: RESULT = a+","+b; :}
          |BOOLEAN ident:a {: RESULT = "boolean "+a; :}
         ;
 
-/Definición de una lista de identificadores
+//Definición de una lista de identificadores
 listaIdent ::= listaIdent:a coma listaIdent:b {: RESULT = a+","+b; :}
                 |ident:a                      {: RESULT = a; :}
                 ;
