@@ -276,8 +276,16 @@ input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
 
 //Definición de uno o más parametros tipados y separados por coma 
 param ::= param:a coma param:b {: RESULT = a+","+b; :}
-         |tipoVarArr:a ident:b {: RESULT = a+" "+b; :}
-         |BOOLEAN ident:a {: RESULT = "boolean "+a; :}
+         |tipoVarArr:a ident:b 
+                {: 
+                        System.out.println("PARSER: parametro: " + b);
+                        symbols_table.get(current_hash).add( "Parametro= "+ b.toString() + ": " + a.toString());
+                :}
+         |BOOLEAN ident:a 
+                {: 
+                        System.out.println("PARSER: parametro: boolean");
+                        symbols_table.get(current_hash).add("Parametro= boolean: " + a.toString());
+                :}
         ;
 
 //Definición de una lista de identificadores
@@ -294,12 +302,12 @@ funcionAsig ::= ident:a aperturaP listaParam:b cerraduraP {: RESULT = a+"("+b+")
 variable ::= tipoVarArr:a ident:b 
                 {: 
                         System.out.println("PARSER: identificardor: " + b);
-                        symbols_table.get(current_hash).add(b.toString() + ": " + a.toString());
+                        symbols_table.get(current_hash).add("Variable= "+ b.toString() + ": " + a.toString());
                 :}
             |BOOLEAN ident:a 
                 {: 
                 System.out.println("PARSER: identificardor: boolean");
-                symbols_table.get(current_hash).add("boolean: " + a.toString());
+                symbols_table.get(current_hash).add("Variable= boolean: " + a.toString());
                 :}
             ;
 
