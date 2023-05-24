@@ -22,6 +22,68 @@ action code{:
                         System.out.println("");
                 }
         }
+
+        public boolean existeVariable(String nombre){
+                String[] tipos = {"int","char","string","boolean","float"};
+                int cuenta = 0;
+                for(int i=0; i<tipos.length; i++){
+                        String muestra = nombre+":"+tipos[i];
+                        if (symbols_table.get(current_hash).contains(muestra)){
+                                cuenta+=1;
+                                break;
+                        }
+                }
+                if(cuenta==1){
+                        return true;
+                }else{
+                        return false;
+                }
+        }
+
+        public void comprobarVariable(String tipo, String nombre){
+                boolean existencia = existeVariable(nombre);
+                if(!existencia){
+                        System.out.println("PARSER: identificardor: " + tipo);
+                        String nuevo = nombre + ":" + tipo;
+                        symbols_table.get(current_hash).add(nuevo);
+                }else{
+                        System.out.println("La variable:" + nombre + "ya existe en esta función");
+                }
+        }
+
+        public void comprobarFuncion(String tipo, String nombre){
+                if (symbols_table.get(nombre)==null){
+                        System.out.println("/_Nueva tabla de simbolos_/:  " + b);
+                        ArrayList<String> funcionMain = new ArrayList<String>();
+                        current_hash = nombre;
+                        funcionMain.add(tipo);
+                        symbols_table.put(current_hash, funcionMain);
+                }else{
+                        String tipoEncontrado = symbols_table.get(nombre).get(0);
+                        if(tipo.equals(tipoEncontrado)){
+                                System.out.println("Esta funcion ya existe");
+                        }else{
+                                System.out.println("/_Nueva tabla de simbolos_/:  " + b);
+                                ArrayList<String> funcionMain = new ArrayList<String>();
+                                current_hash = nombre;
+                                funcionMain.add(tipo);
+                                symbols_table.put(current_hash, funcionMain);
+                        }       
+                }
+        }
+
+        public void verificarAsignacion(String nombre, Object valor){
+                boolean existencia = existeVariable(nombre);
+                if(existencia){
+                        
+                }
+        }
+
+        public String obtenerVariable(String variable) {
+                int indice = variable.indexOf(":");
+                String parteAnterior = input.substring(0, indice);
+                return parteAnterior;
+        }
 :}
 
 parser code {:
@@ -62,7 +124,7 @@ non terminal operando, operacionNum, operacionNumSim, condicion, condicionSim, o
 non terminal tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac, sentencia, variableBool;
 non terminal grupoArreglo, lista, arregloSim, arregloAsig, arregloInd, forD, bloqueFor, expNegada, comentarioBloque;
 // non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr,funcion, variableNum, comentarioLineal;
-non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr, variableNum, comentarioLineal;
+non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoArr, tipoVar, variableNum, comentarioLineal;
 non terminal variableAsig, variable,agrupacionVariable, declaracion, operacionSumaUna, operacionRestaUna;
 non terminal ini, inicio, main, funciones, iniFuncion, identFunc, opBloque, partIzqCreacion, identMain, listaParam;
 non terminal asignacion;
@@ -94,25 +156,13 @@ start with ini;
 //Parte inicial de una función compuesta de un tipo y un identificador, ejemplo: "int miFuncion"
 identFunc ::= tipoFuncion:a ident:b 
                 {: 
-                        System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                        String tipoTabla = "main";
-                        tipoTabla = "Tipo: funcion: " + a;
-                        ArrayList<String> funcionMain = new ArrayList<String>();
-                        current_hash = b.toString();
-                        funcionMain.add(tipoTabla);
-                        symbols_table.put(current_hash, funcionMain);
+                        comprobarFuncion(a.toString(), b.toString());
                 :};
 
 //Parte inicial de la función main compuesta del terminal main y un tipo
 identMain ::= tipoFuncion:a mainC
                 {: 
-                        System.out.println("/_Nueva tabla de simbolos_/:  " + "main");
-                        String tipoTabla = "main";
-                        tipoTabla = "Tipo: main: " + a;
-                        ArrayList<String> funcionMain = new ArrayList<String>();
-                        current_hash = "main";
-                        funcionMain.add(tipoTabla);
-                        symbols_table.put(current_hash, funcionMain);
+                        comprobarFuncion(a.toString(), "main");
                 :};
 
 //Definición de una función común, con posibilidad de contener parametros o no
@@ -197,6 +247,7 @@ variableBool ::= expNegada:a {: RESULT = a; :}
                 |operacionRacNum:a {: RESULT = a; :}
                 |condicion:a {: RESULT = a; :}
                 ;
+                
 //Expresión booleana negada
 expNegada ::= negacion expNegada:a {: RESULT = "!"+a; :}
              |negacion aperturaP condicion:a cerraduraP {: RESULT = "!"+"("+a+")"; :}
@@ -254,7 +305,7 @@ listaParam ::= listaParam:a coma listaParam:b {: RESULT = a+","+b; :}
 asignacion ::= ident:a equivalente agrupacionVariable:b {: RESULT = a+"="+b; :};
 
 //Declaración de un arreglo con tamaño estático, sin ser inicializado
-arregloSim ::= tipoVarArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = c+" "+a+" ["+b.toString()+"]"; :};
+arregloSim ::= tipoArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = c+" "+a+" ["+b.toString()+"]"; :};
 
 //Inicialización de un arreglo a una lista de valores
 arregloAsig ::= arregloSim:a equivalente aperturaC lista:b cerraduraC {: RESULT = a+" = ["+b+"]"; :};
@@ -276,8 +327,7 @@ input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
 
 //Definición de uno o más parametros tipados y separados por coma 
 param ::= param:a coma param:b {: RESULT = a+","+b; :}
-         |tipoVarArr:a ident:b {: RESULT = a+" "+b; :}
-         |BOOLEAN ident:a {: RESULT = "boolean "+a; :}
+         |tipoVar:a ident:b {: RESULT = a+" "+b; :}
         ;
 
 //Definición de una lista de identificadores
@@ -291,16 +341,11 @@ funcionAsig ::= ident:a aperturaP listaParam:b cerraduraP {: RESULT = a+"("+b+")
                 ;
 
 //Definición de la parte inicial de una variable, compuesta de un tipo y un identificador
-variable ::= tipoVarArr:a ident:b 
+variable ::= tipoVar:a ident:b 
                 {: 
-                        System.out.println("PARSER: identificardor: " + b);
-                        symbols_table.get(current_hash).add(b.toString() + ": " + a.toString());
+                        comprobarVariable(a.toString(), b.toString());
                 :}
-            |BOOLEAN ident:a 
-                {: 
-                System.out.println("PARSER: identificardor: boolean");
-                symbols_table.get(current_hash).add("boolean: " + a.toString());
-                :}
+                |tipoVar:a ident:b equivalente agrupacionVariable:a {: System.out.println("PARSER: sentencia: " + a + "\n"); :};
             ;
 
 //Agrupación de expresiones capaces de ser declaradas dentro de un bloque especializado o función
@@ -353,8 +398,6 @@ whileD ::= whileC aperturaP condicion:a cerraduraP {: RESULT = "while("+a+")"; :
 //Definición de bloque do-While
 bloqueDoWhile ::= doD:a whileD:b {: RESULT = a+""+b; :};
 
-//Variable compuesta por su declaració e inicialización
-variableAsig ::= variable equivalente agrupacionVariable:a {: System.out.println("PARSER: sentencia: " + a + "\n"); :};
 //Agrupaciones
 
 //Grupo de expresiones capaces de ser asignadas a una variable
@@ -373,10 +416,13 @@ comentarioLineal ::= comentarioL ident:a {: RESULT = "@"+a; :};
 comentarioBloque ::= comentApert ident:a comentCerrad {: RESULT = "/_ "+a+"_/"; :};
 
 //Agrupación de tipos posibles para variables y arreglos
-tipoVarArr ::= STRING {: RESULT = "string"; :}
-        |INT {: RESULT = "int"; :}
-        |CHAR {: RESULT = "char"; :}
+tipoVar ::= STRING {: RESULT = "string"; :}
+        |tipoArr:a {: RESULT = a :}
         |FLOAT {: RESULT = "float"; :}
+        ;
+
+tipoArr ::= INT {: RESULT = "int"; :}
+        |CHAR {: RESULT = "char"; :}
         ;
 
 //Agrupación de tipos númericos
@@ -411,4 +457,3 @@ operacionRac ::= menor {: RESULT = "<"; :}
 operacionLog ::= conjuncion {: RESULT = "^"; :}
                 |disyuncion {: RESULT = "#"; :}
                 ;
-
