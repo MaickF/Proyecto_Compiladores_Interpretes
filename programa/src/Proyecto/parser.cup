@@ -23,17 +23,24 @@ action code{:
                 }
         }
 
-        public boolean existeVariable(String nombre){
+        public String obtenerTipoVariable(String variable) {
                 String[] tipos = {"int","char","string","boolean","float"};
                 int cuenta = 0;
+                String resultado = "";
                 for(int i=0; i<tipos.length; i++){
-                        String muestra = nombre+":"+tipos[i];
-                        if (symbols_table.get(current_hash).contains(muestra)){
-                                cuenta+=1;
+                        boolean existe = existeVariable(variable, tipos[i]);
+                        if(existe){
+                                resultado = tipos[i];
                                 break;
                         }
                 }
-                if(cuenta==1){
+                return resultado;
+        }
+
+        public boolean existeVariable(String nombre, String tipo){
+                String muestra = nombre+":"+tipo;
+                String muestra2 = "parametro:"+muestra;
+                if (symbols_table.get(current_hash).contains(muestra) || symbols_table.get(current_hash).contains(muestra2)){
                         return true;
                 }else{
                         return false;
@@ -41,8 +48,8 @@ action code{:
         }
 
         public void comprobarVariable(String tipo, String nombre){
-                boolean existencia = existeVariable(nombre);
-                if(!existencia){
+                boolean existencia = obtenerTipoVariable(nombre);
+                if(existencia.equals("")){
                         System.out.println("PARSER: identificardor: " + tipo);
                         String nuevo = nombre + ":" + tipo;
                         symbols_table.get(current_hash).add(nuevo);
@@ -51,7 +58,49 @@ action code{:
                 }
         }
 
-        public void comprobarFuncion(String tipo, String nombre){
+        public void comprobarFuncion(String tipo, String nombre, String param, Object ValorRetorno){
+                if(!(param.equals(""))){
+                        boolean verificarParam = verificarNombresParametros(param);
+                        if(!verificarParam){
+                                String tipoValorRetorno = verificarTipoVariable(valorRetorno);
+                                if(tipoValorRetorno.equals("identifier")){
+                                        String existeValorRetorno=obtenerTipoVariable(tipoValorRetorno);
+                                        if(existeValorRetorno.equals(tipo)){
+                                                existeFuncion(nombre, tipo);
+                                        }else{
+                                                System.out.println("");
+                                        }
+                                }else{
+                                        if(tipoValorRetorno.equals(tipo)){
+                                                existeFuncion(nombre, tipo);
+                                        }else{
+                                                System.out.println("");
+                                        }
+                                }
+                                
+                        }else{
+                               System.out.println("Parametros repetidos"); 
+                        }
+                }else{
+                        String tipoValorRetorno = verificarTipoVariable(valorRetorno);
+                        if(tipoValorRetorno.equals("identifier")){
+                                String existeValorRetorno=obtenerTipoVariable(tipoValorRetorno);
+                                if(existeValorRetorno.equals(tipo)){
+                                        existeFuncion(nombre, tipo);
+                                }else{
+                                        System.out.println("");
+                                }
+                        }else{
+                                if(tipoValorRetorno.equals(tipo)){
+                                        existeFuncion(nombre, tipo);
+                                }else{
+                                        System.out.println("");
+                                }
+                        }
+                }
+        }
+
+        public boolean existeFuncion(String nombre, String tipo, String params){
                 if (symbols_table.get(nombre)==null){
                         System.out.println("/_Nueva tabla de simbolos_/:  " + b);
                         ArrayList<String> funcionMain = new ArrayList<String>();
@@ -60,29 +109,129 @@ action code{:
                         symbols_table.put(current_hash, funcionMain);
                 }else{
                         String tipoEncontrado = symbols_table.get(nombre).get(0);
-                        if(tipo.equals(tipoEncontrado)){
-                                System.out.println("Esta funcion ya existe");
-                        }else{
+                        if(!(tipo.equals(tipoEncontrado))){
                                 System.out.println("/_Nueva tabla de simbolos_/:  " + b);
                                 ArrayList<String> funcionMain = new ArrayList<String>();
                                 current_hash = nombre;
                                 funcionMain.add(tipo);
                                 symbols_table.put(current_hash, funcionMain);
+                        }else{
+                                
                         }       
                 }
         }
 
+        public int contarParametros(String entrada) {
+                String[] parametros = entrada.trim().split(",\\s*");
+                return parametros.length;
+        }
+
+         public List<String> extraerTiposParametros(List<String> parametros) {
+                List<String> tipos = new ArrayList<>();
+
+                for (String parametro : parametros) {
+                        String[] partes = parametro.split(":");
+                        if (partes.length >= 3) {
+                              tipos.add(partes[2]);
+                        }
+                }
+
+                return tipos;
+        }
+
+        public <T> boolean compararListas(List<T> lista1, List<T> lista2) {
+        if (lista1.size() != lista2.size()) {
+            return false;
+        }
+
+        for (int i = 0; i < lista1.size(); i++) {
+            if (!lista1.get(i).equals(lista2.get(i))) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+        public boolean verificarNombresParametros(String parametros) {
+                String[] listaParametros = parametros.split(",");
+                int numParametros = listaParametros.length;
+
+                for (int i = 0; i < numParametros - 1; i++) {
+                        for (int j = i + 1; j < numParametros; j++) {
+                                String nombreParametro1 = listaParametros[i].trim().split(" ")[1];
+                                String nombreParametro2 = listaParametros[j].trim().split(" ")[1];
+
+                                if (nombreParametro1.equals(nombreParametro2)) {
+                                        return true;
+                                }
+                        }
+                }
+
+                return false;
+        }
+
         public void verificarAsignacion(String nombre, Object valor){
-                boolean existencia = existeVariable(nombre);
-                if(existencia){
-                        
+                String existencia = obtenerTipoVariable(nombre);
+                if(existencia.equals("")){
+                        System.out.println("Esta variable no existe");
+                }else{
+                        String tipo = verificarTipoVariable(valor);
+                        if(tipo.equals(existencia)){
+                                System.out.println("good");
+                        }else if(tipo.equals("identifier")){
+                                String existencia2 = obtenerTipoVariable(valor.toString());
+                                if(existencia.equals(existencia2) && !(nombre.equals(valor))){
+                                        System.out.println("good");
+                                }else{
+                                        System.out.println("La variable asignada no coincide");
+                                }
+                        }else{
+                                System.out.println("El tipo del valor no coincide");
+                        }
                 }
         }
 
-        public String obtenerVariable(String variable) {
-                int indice = variable.indexOf(":");
-                String parteAnterior = input.substring(0, indice);
-                return parteAnterior;
+        public void verificarInicializacion(String nombre, String tipo, Object valor){
+                String existencia = existeVariable(nombre, tipo);
+                if(existencia){
+                        System.out.println("Esta variable ya existe");
+                }else{
+                        String tipo = verificarTipoVariable(valor);
+                        if(tipo.equals(tipo)){
+                                System.out.println("good");
+                        }else if(tipo.equals("identifier")){
+                                String existencia2 = obtenerTipoVariable(valor.toString());
+                                if(tipo.equals(existencia2) && !(nombre.equals(valor))){
+                                        System.out.println("good");
+                                }else{
+                                        System.out.println("La variable asignada no coincide");
+                                }
+                        }else{
+                                System.out.println("El tipo del valor no coincide");
+                        }
+                }
+        }
+
+        public String verificarTipoVariable(Object variable) {
+                if (variable instanceof String) {
+                        String valor = (String) variable;
+                if (valor.startsWith("\"") && valor.endsWith("\"")) {
+                        return "String";
+                } else {
+                        return "identifier";
+                }
+                } else if (variable instanceof Integer) {
+                        return "int";
+                } else if (variable instanceof Boolean) {
+                        return "boolean";
+                } else if (variable instanceof Double) {
+                        return "double";
+                } else if (variable instanceof Character) {
+                        return "char";
+                } else {
+                        return "unknown";
+                }
         }
 :}
 
@@ -166,8 +315,8 @@ identMain ::= tipoFuncion:a mainC
                 :};
 
 //Definición de una función común, con posibilidad de contener parametros o no
-iniFuncion ::= identFunc:a aperturaP param:b cerraduraP aperturaB:c bloque:d returnD:e cerraduraB {: RESULT = a+"("+b+") {"+d+e+"}"; :}
-                | identFunc:a aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: RESULT = a+"() {"+b+c+"}"; :}
+iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB {: comprobarFuncion(a.toString(), b.toString(), c.toString()); RESULT = a+" " + b"("+c+") {"+d+e+"}"; :}
+                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: comprobarFuncion(a.toString(), b.toString(), ""); RESULT = a+" " + b"() {"+c+d+"}"; :}
                 ;
 
 //Definición de un bloque que agrupa múltiples funciones
@@ -294,7 +443,6 @@ lista ::= lista:l1 coma lista:l2 {: RESULT = l1+","+l2; :}
 grupoArreglo ::= INTEGER_LITERAL:a {: RESULT = a; :}
                 |FLOAT_LITERAL:a {: RESULT = a; :}
                 |caracter:a {: RESULT = a; :}
-                |STRING_LITERAL:a {: RESULT = a; :}
                 ;
 
 listaParam ::= listaParam:a coma listaParam:b {: RESULT = a+","+b; :}
