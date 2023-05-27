@@ -116,42 +116,66 @@ action code{:
                                 funcionMain.add(tipo);
                                 symbols_table.put(current_hash, funcionMain);
                         }else{
-                                
+                                int params1 = extraerTiposParametros1(params);
+                                ArrayList<String> params2 = extraerTiposParametros2(nombre);
+                                if(params1.size()==params2.size()){
+                                        if(compararListas(params1, params2)){
+                                                System.out.println("La funcion ya existe");
+                                        }else{
+                                                System.out.println("/_Nueva tabla de simbolos_/:  " + b);
+                                                ArrayList<String> funcionMain = new ArrayList<String>();
+                                                current_hash = nombre;
+                                                funcionMain.add(tipo);
+                                                symbols_table.put(current_hash, funcionMain);
+                                        }
+                                }else{
+                                        System.out.println("/_Nueva tabla de simbolos_/:  " + b);
+                                        ArrayList<String> funcionMain = new ArrayList<String>();
+                                        current_hash = nombre;
+                                        funcionMain.add(tipo);
+                                        symbols_table.put(current_hash, funcionMain);
+                                }
                         }       
                 }
         }
 
-        public int contarParametros(String entrada) {
-                String[] parametros = entrada.trim().split(",\\s*");
-                return parametros.length;
-        }
-
-         public List<String> extraerTiposParametros(List<String> parametros) {
-                List<String> tipos = new ArrayList<>();
-
-                for (String parametro : parametros) {
-                        String[] partes = parametro.split(":");
-                        if (partes.length >= 3) {
-                              tipos.add(partes[2]);
-                        }
+        public static ArrayList<String> extraerTiposParametros1(String parametros) {
+                ArrayList<String> tipos = new ArrayList<>();
+        
+                String[] parametrosArray = parametros.split(",\\s*");
+        
+                for (String parametro : parametrosArray) {
+                        String tipo = parametro.trim().split("\\s+")[0];
+                        tipos.add(tipo);
                 }
-
+        
                 return tipos;
         }
 
-        public <T> boolean compararListas(List<T> lista1, List<T> lista2) {
-        if (lista1.size() != lista2.size()) {
-            return false;
+        public ArrayList<String> extraerTiposParametros2(String nombre) {
+                ArrayList<String> tipos = new ArrayList<String>();
+                String tamanho = symbols_table.get(nombre).size();
+                if(tamanho>1){
+                        for (int i = 1; i < symbols_table.get(nombre).size(); i++) {
+                                String parametro = symbols_table.get(nombre).get();
+                                String[] partes = parametro.split(":");
+                                if (partes.length >= 3) {
+                                        tipos.add(partes[2]);
+                                }
+                        }
+                }
+                return tipos;
         }
 
-        for (int i = 0; i < lista1.size(); i++) {
-            if (!lista1.get(i).equals(lista2.get(i))) {
-                return false;
-            }
-        }
+        public boolean compararListas(ArrayList<String> lista1, ArrayList<String> lista2) {
+                for (int i = 0; i < lista1.size(); i++) {
+                        if (!lista1.get(i).equals(lista2.get(i))) {
+                                return false;
+                        }
+                }
 
-        return true;
-    }
+                return true;
+        }
 
         public boolean verificarNombresParametros(String parametros) {
                 String[] listaParametros = parametros.split(",");
