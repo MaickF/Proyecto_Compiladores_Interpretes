@@ -10,8 +10,10 @@ import java.util.ArrayList;
 
 //Inicialización de l hasmap para desarrollar las tablas de símbolos
 action code{:
+        ArrayList<String> variables = new ArrayList<String>();
         HashMap<String, ArrayList<String>> symbols_table = new HashMap<String, ArrayList<String>>();
         String current_hash;
+
         public void print_symbols_table(){
                 for (String key: symbols_table.keySet()) {
                         System.out.println("Tabla de simbolos: \n" + key);
@@ -40,7 +42,9 @@ action code{:
         public boolean existeVariable(String nombre, String tipo){
                 String muestra = nombre+":"+tipo;
                 String muestra2 = "parametro:"+muestra;
-                if (symbols_table.get(current_hash).contains(muestra) || symbols_table.get(current_hash).contains(muestra2)){
+                System.out.println(muestra);
+                System.out.println(muestra2);
+                if (variables.contains(muestra) || variables.contains(muestra2)){
                         return true;
                 }else{
                         return false;
@@ -48,92 +52,67 @@ action code{:
         }
 
         public void comprobarVariable(String tipo, String nombre){
-                boolean existencia = obtenerTipoVariable(nombre);
+                String existencia = obtenerTipoVariable(nombre);
                 if(existencia.equals("")){
                         System.out.println("PARSER: identificardor: " + tipo);
                         String nuevo = nombre + ":" + tipo;
-                        symbols_table.get(current_hash).add(nuevo);
+                        variables.add(nuevo);
                 }else{
                         System.out.println("La variable:" + nombre + "ya existe en esta función");
                 }
         }
 
-        public void comprobarFuncion(String tipo, String nombre, String param, Object ValorRetorno){
-                if(!(param.equals(""))){
-                        boolean verificarParam = verificarNombresParametros(param);
-                        if(!verificarParam){
-                                String tipoValorRetorno = verificarTipoVariable(valorRetorno);
-                                if(tipoValorRetorno.equals("identifier")){
-                                        String existeValorRetorno=obtenerTipoVariable(tipoValorRetorno);
-                                        if(existeValorRetorno.equals(tipo)){
-                                                existeFuncion(nombre, tipo);
-                                        }else{
-                                                System.out.println("");
-                                        }
-                                }else{
-                                        if(tipoValorRetorno.equals(tipo)){
-                                                existeFuncion(nombre, tipo);
-                                        }else{
-                                                System.out.println("");
-                                        }
-                                }
-                                
+        public void comprobarFuncion(String tipo, String nombre, String param, Object valorRetorno){
+                System.out.println("prueba0");
+                String tipoValorRetorno = verificarTipoVariable(valorRetorno);
+                if(tipoValorRetorno.equals("identifier")){
+                        String existeValorRetorno=obtenerTipoVariable(tipoValorRetorno);
+                        if(existeValorRetorno.equals(tipo)){
+                                existeFuncion(nombre, tipo, param);
                         }else{
-                               System.out.println("Parametros repetidos"); 
+                                System.out.println("");
                         }
                 }else{
-                        String tipoValorRetorno = verificarTipoVariable(valorRetorno);
-                        if(tipoValorRetorno.equals("identifier")){
-                                String existeValorRetorno=obtenerTipoVariable(tipoValorRetorno);
-                                if(existeValorRetorno.equals(tipo)){
-                                        existeFuncion(nombre, tipo);
-                                }else{
-                                        System.out.println("");
-                                }
+                        if(tipoValorRetorno.equals(tipo)){
+                                        existeFuncion(nombre, tipo, param);
                         }else{
-                                if(tipoValorRetorno.equals(tipo)){
-                                        existeFuncion(nombre, tipo);
-                                }else{
-                                        System.out.println("");
-                                }
+                                System.out.println("");
                         }
                 }
+                
         }
 
-        public boolean existeFuncion(String nombre, String tipo, String params){
+        public void existeFuncion(String nombre, String tipo, String params){
+                System.out.println("prueba1");
                 if (symbols_table.get(nombre)==null){
-                        System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                        ArrayList<String> funcionMain = new ArrayList<String>();
+                        System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                         current_hash = nombre;
-                        funcionMain.add(tipo);
-                        symbols_table.put(current_hash, funcionMain);
+                        variables.add(tipo);
+                        symbols_table.put(current_hash, variables);
                 }else{
                         String tipoEncontrado = symbols_table.get(nombre).get(0);
                         if(!(tipo.equals(tipoEncontrado))){
-                                System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                                ArrayList<String> funcionMain = new ArrayList<String>();
+                                System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                                 current_hash = nombre;
-                                funcionMain.add(tipo);
-                                symbols_table.put(current_hash, funcionMain);
+                                variables.add(tipo);
+                                symbols_table.put(current_hash, variables);
                         }else{
-                                int params1 = extraerTiposParametros1(params);
+                                ArrayList<String> params1 = extraerTiposParametros1(params);
                                 ArrayList<String> params2 = extraerTiposParametros2(nombre);
                                 if(params1.size()==params2.size()){
                                         if(compararListas(params1, params2)){
                                                 System.out.println("La funcion ya existe");
                                         }else{
-                                                System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                                                ArrayList<String> funcionMain = new ArrayList<String>();
+                                                System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                                                 current_hash = nombre;
-                                                funcionMain.add(tipo);
-                                                symbols_table.put(current_hash, funcionMain);
+                                                variables.add(tipo);
+                                                symbols_table.put(current_hash, variables);
                                         }
                                 }else{
-                                        System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                                        ArrayList<String> funcionMain = new ArrayList<String>();
+                                        System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                                         current_hash = nombre;
-                                        funcionMain.add(tipo);
-                                        symbols_table.put(current_hash, funcionMain);
+                                        variables.add(tipo);
+                                        symbols_table.put(current_hash, variables);
                                 }
                         }       
                 }
@@ -154,10 +133,10 @@ action code{:
 
         public ArrayList<String> extraerTiposParametros2(String nombre) {
                 ArrayList<String> tipos = new ArrayList<String>();
-                String tamanho = symbols_table.get(nombre).size();
+                int tamanho = symbols_table.get(nombre).size();
                 if(tamanho>1){
                         for (int i = 1; i < symbols_table.get(nombre).size(); i++) {
-                                String parametro = symbols_table.get(nombre).get();
+                                String parametro = symbols_table.get(nombre).get(i);
                                 String[] partes = parametro.split(":");
                                 if (partes.length >= 3) {
                                         tipos.add(partes[2]);
@@ -217,16 +196,17 @@ action code{:
         }
 
         public void verificarInicializacion(String nombre, String tipo, Object valor){
-                String existencia = existeVariable(nombre, tipo);
+                System.out.println("Entro a verificar inicializacion");
+                boolean existencia = existeVariable(nombre, tipo);
                 if(existencia){
                         System.out.println("Esta variable ya existe");
                 }else{
-                        String tipo = verificarTipoVariable(valor);
-                        if(tipo.equals(tipo)){
+                        String tipo2 = verificarTipoVariable(valor);
+                        if(tipo.equals(tipo2)){
                                 System.out.println("good");
-                        }else if(tipo.equals("identifier")){
+                        }else if(tipo2.equals("identifier")){
                                 String existencia2 = obtenerTipoVariable(valor.toString());
-                                if(tipo.equals(existencia2) && !(nombre.equals(valor))){
+                                if(tipo2.equals(existencia2) && !(nombre.equals(valor))){
                                         System.out.println("good");
                                 }else{
                                         System.out.println("La variable asignada no coincide");
@@ -257,6 +237,26 @@ action code{:
                         return "unknown";
                 }
         }
+
+        public static boolean esOperacion(Object obj) {
+        if (obj instanceof String) {
+            String expresion = (String) obj;
+            String[] operadores = {"-", "+", "*", "**", "/"};
+            
+            for (String operador : operadores) {
+                if (expresion.contains(operador)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    public String hola(){
+        System.out.println("hola");
+        return "hola";
+    }
 :}
 
 parser code {:
@@ -325,22 +325,9 @@ start with ini;
 //                         symbols_table.get(current_hash).add(b.toString() + ": " + a.toString());
 //                 :};
 
-
-//Parte inicial de una función compuesta de un tipo y un identificador, ejemplo: "int miFuncion"
-identFunc ::= tipoFuncion:a ident:b 
-                {: 
-                        comprobarFuncion(a.toString(), b.toString());
-                :};
-
-//Parte inicial de la función main compuesta del terminal main y un tipo
-identMain ::= tipoFuncion:a mainC
-                {: 
-                        comprobarFuncion(a.toString(), "main");
-                :};
-
 //Definición de una función común, con posibilidad de contener parametros o no
-iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB {: comprobarFuncion(a.toString(), b.toString(), c.toString()); RESULT = a+" " + b"("+c+") {"+d+e+"}"; :}
-                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: comprobarFuncion(a.toString(), b.toString(), ""); RESULT = a+" " + b"() {"+c+d+"}"; :}
+iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB {: comprobarFuncion(a.toString(), b.toString(), c.toString(), e); RESULT = a+" " + b+"("+c+") {"+d+e+"}"; :}
+                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: comprobarFuncion(a.toString(), b.toString(), "", d); RESULT = a+" " + b+"() {"+c+d+"}"; :}
                 ;
 
 //Definición de un bloque que agrupa múltiples funciones
@@ -349,25 +336,25 @@ funciones ::= funciones iniFuncion:a {: System.out.println("/_Fin de tabla de si
                 ;
 
 //Definición de la función main
-main ::= identMain aperturaP cerraduraP aperturaB bloque returnD cerraduraB {: System.out.println("/_Fin de tabla de simbolos3: _/ : main"); :};
+main ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: comprobarFuncion(a.toString(), "main", "", c); RESULT = hola(); System.out.println("su maire"); :};
 
 //Agrupación de múltiples funciones, entre las que debe estar la función main
 inicio ::= funciones main
-                | main funciones
+                | main funciones {: System.out.println("Entro"); :}
                 | funciones main funciones
-                | main
+                | main {: System.out.println("Entro"); :}
                 ;
 
 //Símbolo inicial del programa
-ini ::= inicio {: print_symbols_table(); :};
+ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); :};
 
 //Operando numérico que posteriormente podrá ser utilizado para operaciones númericas y racionales
 operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString(); :}
             | FLOAT_LITERAL:a {: RESULT = a.toString(); :}
             | ident:a {: RESULT = a; :}
             | funcionAsig:a {: RESULT = a; :}
-            | operacionSumaUna
-            | operacionRestaUna
+            | operacionSumaUna:a {: RESULT = a; :}
+            | operacionRestaUna:a {: RESULT = a; :}
             ;
 
 //operación aritmétrica simple, compuesta de dos operandos
@@ -474,7 +461,7 @@ listaParam ::= listaParam:a coma listaParam:b {: RESULT = a+","+b; :}
                 | listaIdent:n {: RESULT = n; :}
                 ;
 
-asignacion ::= ident:a equivalente agrupacionVariable:b {: RESULT = a+"="+b; :};
+asignacion ::= ident:a equivalente agrupacionVariable:b {: verificarAsignacion(a.toString(), b); RESULT = a+"="+b; :};
 
 //Declaración de un arreglo con tamaño estático, sin ser inicializado
 arregloSim ::= tipoArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = c+" "+a+" ["+b.toString()+"]"; :};
@@ -499,7 +486,7 @@ input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
 
 //Definición de uno o más parametros tipados y separados por coma 
 param ::= param:a coma param:b {: RESULT = a+","+b; :}
-         |tipoVar:a ident:b {: RESULT = a+" "+b; :}
+         |tipoVar:a ident:b {: comprobarVariable(a.toString(), b.toString()); RESULT = a+" "+b; :}
         ;
 
 //Definición de una lista de identificadores
@@ -516,8 +503,33 @@ funcionAsig ::= ident:a aperturaP listaParam:b cerraduraP {: RESULT = a+"("+b+")
 variable ::= tipoVar:a ident:b 
                 {: 
                         comprobarVariable(a.toString(), b.toString());
+                        RESULT = a + " " + b;
                 :}
-                |tipoVar:a ident:b equivalente agrupacionVariable:a {: System.out.println("PARSER: sentencia: " + a + "\n"); :};
+                |
+                tipoArr:a ident:b 
+                {: 
+                        comprobarVariable(a.toString(), b.toString());
+                        RESULT = a + " " + b;
+                :}
+                |tipoArr:a ident:b equivalente agrupacionVariable:c 
+                {: 
+                        if(!esOperacion(c)){
+                                verificarInicializacion(b.toString(), a.toString(), c); 
+                                System.out.println("PARSER: sentencia: " + a + "\n");
+                        }else{
+                                System.out.println("Es operacion");
+                        }
+                        RESULT = a + " " + b + " = " + c;
+                :}
+                |tipoVar:a ident:b equivalente agrupacionVariable:c 
+                {: 
+                        if(!esOperacion(c)){
+                                verificarInicializacion(b.toString(), a.toString(), c); System.out.println("PARSER: sentencia: " + a + "\n");
+                        }else{
+                                System.out.println("Es operacion");
+                        }
+                        RESULT = a + " " + b + " = " + c;
+                :}
             ;
 
 //Agrupación de expresiones capaces de ser declaradas dentro de un bloque especializado o función
@@ -589,7 +601,6 @@ comentarioBloque ::= comentApert ident:a comentCerrad {: RESULT = "/_ "+a+"_/"; 
 
 //Agrupación de tipos posibles para variables y arreglos
 tipoVar ::= STRING {: RESULT = "string"; :}
-        |tipoArr:a {: RESULT = a :}
         |FLOAT {: RESULT = "float"; :}
         ;
 
