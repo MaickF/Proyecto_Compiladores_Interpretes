@@ -14,7 +14,7 @@ action code{:
         ArrayList<String> variables = new ArrayList<String>();
         String operandosArit = "int";
         boolean operandosRel = true;
-        boolean error;
+        boolean error = false;
         String retornoActual;
         HashMap<String, ArrayList<String>> symbols_table = new HashMap<String, ArrayList<String>>();
         String current_hash;
@@ -31,11 +31,7 @@ action code{:
         }
 
         public void comprobarOperando(String operando){
-                System.out.println("Analizando operando: "+ operando);
-                System.out.println("\n");
                 String tipo = verificarTipoVariable(operando);
-                System.out.println("tipo:" + tipo);
-                System.out.println("\n");
                 if(operandosArit.equals("error")){
 
                 }else{
@@ -81,17 +77,12 @@ action code{:
         public String parametrosFuncionAsig(String funcionAsig){
                 ArrayList<String> nombreParams = obtenerNombreYParametros(funcionAsig);
                 ArrayList<String> nombre = symbols_table.get(nombreParams.get(nombreParams.size()-1));
-                System.out.println("funcion1:"+nombreParams);
-                System.out.println("funcion2:"+nombre);
                 if(nombre!=null){
                         ArrayList<String> tiposB = extraerTiposParametros2(nombreParams.get(nombreParams.size()-1));
-                        System.out.println("funcion3:"+tiposB);
                         if(nombreParams.size()-1==tiposB.size()){
-                                System.out.println("jajaja:");
                                 if(nombreParams.size()==1){
                                         return nombre.get(nombre.size()-1);
                                 }else if(nombreParams.size()>1){
-                                        System.out.println("jajaja2:");
                                         ArrayList<String> tiposA =  new ArrayList<String>();
                                         for(int i = 0; i < nombreParams.size()-1; i++){
                                                 String tipo = verificarTipoVariable(nombreParams.get(i));
@@ -113,7 +104,6 @@ action code{:
                                                         tiposA.add(tipo);
                                                 }
                                         }
-                                        System.out.println("funcion4:"+tiposA);
                                         if(compararListas(tiposA, tiposB)){
                                                 return nombre.get(nombre.size()-1);
                                         }else{
@@ -137,8 +127,6 @@ action code{:
                 for(int i=0; i<tipos.length; i++){
                         boolean existe = existeVariable(variable, tipos[i]);
                         if(existe){
-                                System.out.println("-----------La variable existe------------");
-                                System.out.println("\n");
                                 resultado = tipos[i];
                                 break;
                         }
@@ -168,12 +156,16 @@ action code{:
                                 variables.add(nuevo);
                         }
                 }else{
-                        System.out.println("La variable:" + nombre + "ya existe en esta función");
+                        if(param){
+                                error = true;
+                                System.out.println("Parametro:" + nombre + "repetido, por favor solucione el error para crear la funcion");
+                        }else{
+                                System.out.println("La variable:" + nombre + "ya existe en esta función");                                
+                        }
                 }
         }
 
         public void comprobarFuncion(String tipo, String nombre, String param){
-                System.out.println("prueba0");
                 String tipoValorRetorno = verificarTipoVariable(retornoActual);
                 if(tipoValorRetorno.equals("identifier")){
                         String existeValorRetorno=obtenerTipoVariable(retornoActual.toString());
@@ -193,7 +185,6 @@ action code{:
         }
 
         public void existeFuncion(String nombre, String tipo, String params){
-                System.out.println("prueba1");
                 if (symbols_table.get(nombre)==null){
                         System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                         current_hash = nombre;
@@ -269,9 +260,7 @@ action code{:
                 // Obtener la lista de parámetros
                 int indiceParentesisCierra = expresion.lastIndexOf(')');
                 String parametrosString = expresion.substring(indiceParentesisAbre + 1, indiceParentesisCierra);
-                System.out.println("********" + parametrosString + "******");
                 if(parametrosString.isEmpty()){
-                        System.out.println("********" + parametrosString + "******");
                         ArrayList<String> listaParametros = new ArrayList<String>();
                         listaParametros.add(nombreFuncion);
                         return listaParametros;
@@ -320,16 +309,25 @@ action code{:
                 }else{
                         String tipo = verificarTipoVariable(valor);
                         if(tipo.equals(existencia)){
-                                System.out.println("good");
+                                System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                         }else if(tipo.equals("identifier")){
                                 String existencia2 = obtenerTipoVariable(valor.toString());
                                 if(existencia.equals(existencia2) && !(nombre.equals(valor))){
-                                        System.out.println("good");
+                                        System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                                 }else{
-                                        System.out.println("La variable asignada no coincide");
+                                        System.out.println("La variable:" + nombre +"no coincide con el valor de: "+valor);
+                                }
+                        }else if(tipo.equals("function")){
+                                String tipoFuncion = parametrosFuncionAsig(valor);
+                                if(tipoFuncion.equals("error")){
+                                        System.out.println("La variable:" + nombre +"no coincide con el valor de: "+valor);
+                                }else if(tipoFuncion.equals(existencia)){
+                                        System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
+                                }else{
+                                        System.out.println("La variable:" + nombre +"no coincide con el valor de: "+valor);
                                 }
                         }else{
-                                System.out.println("El tipo del valor no coincide");
+                                System.out.println("La variable:" + nombre +"no coincide con el valor de: "+valor);
                         }
                 }
         }
@@ -340,22 +338,32 @@ action code{:
                 System.out.println("\n");
                 boolean existencia = existeVariable(nombre, tipo);
                 if(existencia){
-                        System.out.println("Esta variable ya existe");
+                        System.out.println("La variable: "+ nombre + "ya existe");
                 }else{
                         String tipo2 = verificarTipoVariable(valor);
                         if(tipo.equals(tipo2)){
-                                System.out.println("good");
+                                System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                                 variables.add(nombre+":"+tipo);
                         }else if(tipo2.equals("identifier")){
                                 String existencia2 = obtenerTipoVariable(valor.toString());
                                 if(tipo.equals(existencia2) && !(nombre.equals(valor.toString()))){
-                                        System.out.println("good");
+                                        System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                                         variables.add(nombre+":"+tipo);
                                 }else{
-                                        System.out.println("La variable asignada no coincide");
+                                        System.out.println("La variable:" + nombre +"no coincide con el valor de: "+valor);
+                                }
+                        }else if(tipo2.equals("function")){
+                                String tipoFuncion = parametrosFuncionAsig(valor);
+                                if(tipoFuncion.equals("error")){
+                                        System.out.println("La variable:" + nombre +"no coincide con el valor de: "+valor);
+                                }else if(tipoFuncion.equals(tipo)){
+                                        System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
+                                        variables.add(nombre+":"+tipo);
+                                }else{
+                                        System.out.println("La variable:" + nombre +"no coincide con el valor de: "+valor);
                                 }
                         }else{
-                                System.out.println("El tipo del valor no coincide2");
+                                System.out.println("La variable:" + nombre +"no coincide con el valor de: "+valor);
                         }
                 }
         }
@@ -380,7 +388,6 @@ action code{:
                 if (variable.length() == 1) {
                         return "char";
                 }
-                System.out.println("********"+variable+"*********");
                 if (variable.startsWith("@") || variable.equals("read()")) {
                         return "string";
                 }else if(variable.endsWith("++") || variable.endsWith("--")){
@@ -480,8 +487,29 @@ start with ini;
 //                 :};
 
 //Definición de una función común, con posibilidad de contener parametros o no
-iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB {: comprobarFuncion(a.toString(), b.toString(), c.toString()); RESULT = a+" " + b+"("+c+") {"+d+e+"}";System.out.println("bienvenido al himalaya"); :}
-                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: comprobarFuncion(a.toString(), b.toString(), ""); RESULT = a+" " + b+"() {"+c+d+"}";System.out.println("bienvenido al himalayawwwwwwww"); :}
+iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB 
+                {: 
+                        if(error){
+                                System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
+                                error = false;
+                        }else{
+                                comprobarFuncion(a.toString(), b.toString(), c.toString()); 
+                                RESULT = a+" " + b+"("+c+") {"+d+e+"}";
+                                variables = new ArrayList<String>();
+                                retornoActual = "";
+                        }
+                :}
+                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB 
+                {: 
+                        if(error){
+                                System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
+                                error = false;
+                        }else{
+                                comprobarFuncion(a.toString(), b.toString(), ""); RESULT = a+" " + b+"() {"+c+d+"}"; 
+                                variables = new ArrayList<String>();
+                                retornoActual = "";
+                        }
+                :}
                 ;
 
 //Definición de un bloque que agrupa múltiples funciones
@@ -490,13 +518,13 @@ funciones ::= funciones iniFuncion:a {: System.out.println("/_Fin de tabla de si
                 ;
 
 //Definición de la función main
-main ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: comprobarFuncion(a.toString(), "main", ""); RESULT = hola(); System.out.println("su maire"); :};
+main ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: comprobarFuncion(a.toString(), "main", ""); RESULT = a+" main() {"+b+c+"}"; :};
 
 //Agrupación de múltiples funciones, entre las que debe estar la función main
 inicio ::= funciones main
-                | main funciones {: System.out.println("Entro"); :}
+                | main funciones 
                 | funciones main funciones
-                | main {: System.out.println("Entro"); :}
+                | main 
                 ;
 
 //Símbolo inicial del programa
@@ -631,7 +659,7 @@ asignacion ::= ident:a equivalente agrupacionVariable:b {: verificarAsignacion(a
                 ;
 
 //Declaración de un arreglo con tamaño estático, sin ser inicializado
-arregloSim ::= tipoArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = c+" "+a+" ["+b.toString()+"]"; :};
+arregloSim ::= tipoArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: comprobarVariable(c.toString(), a.toString(), false); RESULT = c+" "+a+" ["+b.toString()+"]"; :};
 
 //Inicialización de un arreglo a una lista de valores
 arregloAsig ::= arregloSim:a equivalente aperturaC lista:b cerraduraC {: RESULT = a+" = ["+b+"]"; :};
@@ -689,7 +717,7 @@ variable ::= tipoVar:a ident:b
                         }else{
                                 System.out.println("Es una operacion");
                                 if(operandosArit.equals("error")){
-                                        System.out.println("operacion invalida");
+                                        System.out.println("La operacion: " +c+" es invalida");
                                 }else if(operandosArit.equals("int")){
                                         verificarInicializacion(b.toString(), a.toString(), "1"); 
                                 }else{
@@ -706,7 +734,7 @@ variable ::= tipoVar:a ident:b
                         }else{
                                 System.out.println("Es una operacion");
                                 if(operandosArit.equals("error")){
-                                        System.out.println("operacion invalida");
+                                        System.out.println("La operacion: " +c+" es invalida");
                                 }else if(operandosArit.equals("int")){
                                         verificarInicializacion(b.toString(), a.toString(), "1"); 
                                 }else{
