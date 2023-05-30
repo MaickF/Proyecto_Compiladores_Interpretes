@@ -4,7 +4,7 @@ int residuo (int num){
     }
 
 int main() {
-    int temp = 12 ** residuo(num)$
+    int temp = 12 ** 5$
     if (temp == 12 # !xd)
         {
             int temp1 = read()$ 
