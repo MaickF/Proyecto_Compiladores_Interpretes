@@ -7,6 +7,7 @@ import java_cup.runtime.*;
 import java.util.HashMap;
 import java.util.Hash;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 //Inicialización de l hasmap para desarrollar las tablas de símbolos
 action code{:
@@ -52,7 +53,19 @@ action code{:
                                         operandosArit = "error";
                                 }
                         }else if(tipo.equals("function")){
-                                ArraList<String> nombreParams = obtenerNombreYParametros();
+                                String tipoIdentificador = parametrosFuncionAsig(operando);
+                                System.out.println(tipoIdentificador);
+                                if(tipoIdentificador.equals("error")){
+                                        operandosArit = "error";
+                                }else if(operandosArit.equals("float") && (tipoIdentificador.equals("int") || tipoIdentificador.equals("float"))){
+                                        operandosArit="float";
+                                }else if(tipoIdentificador.equals("float")){
+                                        operandosArit="float";
+                                }else if(operandosArit.equals("int") && tipoIdentificador.equals("int")){
+                                        operandosArit = "int";
+                                }else{
+                                        operandosArit = "error";
+                                }
                         }else if(operandosArit.equals("int") && tipo.equals("int")){
                                 	operandosArit = "int";
                         }else if(operandosArit.equals("float") && tipo.equals("int")){
@@ -62,6 +75,58 @@ action code{:
                         }else{
                                 operandosArit = "error";
                         }
+                }
+        }
+
+        public String parametrosFuncionAsig(String funcionAsig){
+                ArrayList<String> nombreParams = obtenerNombreYParametros(funcionAsig);
+                ArrayList<String> nombre = symbols_table.get(nombreParams.get(nombreParams.size()-1));
+                System.out.println("funcion1:"+nombreParams);
+                System.out.println("funcion2:"+nombre);
+                if(nombre!=null){
+                        ArrayList<String> tiposB = extraerTiposParametros2(nombreParams.get(nombreParams.size()-1));
+                        System.out.println("funcion3:"+tiposB);
+                        if(nombreParams.size()-1==tiposB.size()){
+                                System.out.println("jajaja:");
+                                if(nombreParams.size()==1){
+                                        return nombre.get(nombre.size()-1);
+                                }else if(nombreParams.size()>1){
+                                        System.out.println("jajaja2:");
+                                        ArrayList<String> tiposA =  new ArrayList<String>();
+                                        for(int i = 0; i < nombreParams.size()-1; i++){
+                                                String tipo = verificarTipoVariable(nombreParams.get(i));
+                                                if(tipo.equals("identifier")){
+                                                        String tipoE = obtenerTipoVariable(nombreParams.get(i));
+                                                        if(tipoE.equals("")){
+                                                                return "error";
+                                                        }else{
+                                                                tiposA.add(tipoE);
+                                                        }
+                                                }else if(tipo.equals("function")){
+                                                        String tipoE = parametrosFuncionAsig(nombreParams.get(i));
+                                                        if(tipoE.equals("error")){
+                                                                return "error";
+                                                        }else{
+                                                                tiposA.add(tipoE);
+                                                        }
+                                                }else{
+                                                        tiposA.add(tipo);
+                                                }
+                                        }
+                                        System.out.println("funcion4:"+tiposA);
+                                        if(compararListas(tiposA, tiposB)){
+                                                return nombre.get(nombre.size()-1);
+                                        }else{
+                                                return "error";
+                                        }
+                                }else{
+                                        return "error";
+                                }
+                        }else{
+                                return "error";
+                        }
+                }else{
+                        return "error";
                 }
         }
 
@@ -96,10 +161,10 @@ action code{:
                 if(existencia.equals("")){
                         System.out.println("PARSER: identificardor: " + tipo);
                         if(param){
-                                String nuevo = nombre + ":" + tipo;
+                                String nuevo = "parametro:" + nombre + ":" + tipo;
                                 variables.add(nuevo);
                         }else{
-                                String nuevo = nombre + "parametro:" + tipo;
+                                String nuevo = nombre + ":" + tipo;
                                 variables.add(nuevo);
                         }
                 }else{
@@ -194,6 +259,7 @@ action code{:
         public ArrayList<String> obtenerNombreYParametros(String expresion) {
                 // Eliminar espacios en blanco
                 expresion = expresion.replaceAll("\\s+", "");
+                System.out.println(expresion);
 
                 // Obtener el nombre de la función
                 int indiceParentesisAbre = expresion.indexOf('(');
@@ -203,12 +269,21 @@ action code{:
                 // Obtener la lista de parámetros
                 int indiceParentesisCierra = expresion.lastIndexOf(')');
                 String parametrosString = expresion.substring(indiceParentesisAbre + 1, indiceParentesisCierra);
-                String[] parametros = parametrosString.split(",");
-                ArrayList<String> listaParametros = new ArrayList<>(Arrays.asList(parametros));
-                listaParametros.add(nombreFuncion);
-                System.out.println("Lista de parámetros: " + listaParametros);
-                return listaParametros;
-        2}
+                System.out.println("********" + parametrosString + "******");
+                if(parametrosString.isEmpty()){
+                        System.out.println("********" + parametrosString + "******");
+                        ArrayList<String> listaParametros = new ArrayList<String>();
+                        listaParametros.add(nombreFuncion);
+                        return listaParametros;
+                }else{
+                        String[] parametros = parametrosString.split(",");
+                        ArrayList<String> listaParametros = new ArrayList<>(Arrays.asList(parametros));
+                        listaParametros.add(nombreFuncion);
+                        System.out.println("Lista de parámetros: " + listaParametros);
+                        return listaParametros;
+                }
+                
+        }
 
         public boolean compararListas(ArrayList<String> lista1, ArrayList<String> lista2) {
                 for (int i = 0; i < lista1.size(); i++) {
@@ -405,8 +480,8 @@ start with ini;
 //                 :};
 
 //Definición de una función común, con posibilidad de contener parametros o no
-iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB {: comprobarFuncion(a.toString(), b.toString(), c.toString()); RESULT = a+" " + b+"("+c+") {"+d+e+"}"; :}
-                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: comprobarFuncion(a.toString(), b.toString(), ""); RESULT = a+" " + b+"() {"+c+d+"}"; :}
+iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB {: comprobarFuncion(a.toString(), b.toString(), c.toString()); RESULT = a+" " + b+"("+c+") {"+d+e+"}";System.out.println("bienvenido al himalaya"); :}
+                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: comprobarFuncion(a.toString(), b.toString(), ""); RESULT = a+" " + b+"() {"+c+d+"}";System.out.println("bienvenido al himalayawwwwwwww"); :}
                 ;
 
 //Definición de un bloque que agrupa múltiples funciones
@@ -579,8 +654,9 @@ print ::= printC aperturaP STRING_LITERAL:a cerraduraP {: RESULT = "print("+a+")
 input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
 
 //Definición de uno o más parametros tipados y separados por coma 
-param ::= param:a coma param:b {: RESULT = a+","+b; :}
-         |tipoVar:a ident:b {: comprobarVariable(a.toString(), b.toString()); RESULT = a+" "+b; :}
+param ::= param:a coma param:b {: RESULT = a+","+b; System.out.println("XDXDDDD"); :}
+         |tipoVar:a ident:b {: comprobarVariable(a.toString(), b.toString(), true); RESULT = a+" "+b; System.out.println("XDXD"); :}
+         |tipoArr:a ident:b {: comprobarVariable(a.toString(), b.toString(), true); RESULT = a+" "+b; System.out.println("XDXDD"); :}
         ;
 
 //Definición de una lista de identificadores
@@ -596,13 +672,13 @@ funcionAsig ::= ident:a aperturaP listaParam:b cerraduraP {: RESULT = a+"("+b+")
 //Definición de la parte inicial de una variable, compuesta de un tipo y un identificador
 variable ::= tipoVar:a ident:b 
                 {: 
-                        comprobarVariable(a.toString(), b.toString());
+                        comprobarVariable(a.toString(), b.toString(), false);
                         RESULT = a + " " + b;
                 :}
                 |
                 tipoArr:a ident:b 
                 {: 
-                        comprobarVariable(a.toString(), b.toString());
+                        comprobarVariable(a.toString(), b.toString(), false);
                         RESULT = a + " " + b;
                 :}
                 |tipoArr:a ident:b equivalente agrupacionVariable:c 
