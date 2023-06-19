@@ -865,3 +865,15 @@ operacionRac ::= menor {: RESULT = "<"; :}
 operacionLog ::= conjuncion {: RESULT = "^"; :}
                 |disyuncion {: RESULT = "#"; :}
                 ;
+
+int main(){
+        do{
+                print("Indique un numero: ");
+                int num = read();
+                num = num+1;
+                print("\nel incremento es: ");
+                print(num);
+        }while(num > 0 && num < 100);
+        print("adios");
+}
+

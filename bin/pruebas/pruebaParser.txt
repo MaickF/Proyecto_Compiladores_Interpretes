@@ -1,0 +1,33 @@
+int prueba(boolean ayuda, float xd){
+  char carac$
+  54-5*7/8**6~ga$
+  boolean arroz = true$
+  char arreglo[5] = [1,2,3,4]$
+  xd==jk$
+  int Raur = 1+2+3+5.5$
+  print("kakaka")$
+  proar()$
+  xdxdx(lm,op)$
+  if(po){
+    int Raur = 1+2+3+5.5$
+    print("kakaka")$
+    for(int ic = 9 in arregloImaginario ++mp){
+      do{
+        xdxdx(lm,op)$
+      }while(fc>=8 ^ tm==rt)
+      if(vv==yy # tt<=xc){
+        1+2$
+      }elif(gg){
+        2+2$
+      }else{
+        89+44$
+      }
+    }
+  }
+  return carac$
+}
+
+
+int main(){
+  prueba(ayuda, xd)$
+}
