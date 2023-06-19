@@ -21,6 +21,29 @@ action code{:
         StringBuffer cod3D = new StringBuffer();
         int currentTemp = 1;
 
+        StringBuffer cod_mips_data = new StringBuffer();
+        StringBuffer cod_mips_text = new StringBuffer();
+        int currentVar = 0;
+
+        public void print_mips(String print_string){
+                System.out.println("Entro al print");
+                String string_var_name = "var" + currentVar;
+                currentVar++;
+                cod_mips_data.append(string_var_name + ": .asciiz \"" + print_string + "\\n\"\n");
+                cod_mips_text.append("li $v0, 4\n");
+                cod_mips_text.append("la $a0, " + string_var_name + "\n");
+                cod_mips_text.append("syscall\n");
+        }
+
+        public void print_cod_mips(){
+                System.out.println("Codigo en MIPS");
+                System.out.println(".data\n");
+                System.out.println(cod_mips_data);
+                System.out.println(".text\n");
+                System.out.println(cod_mips_text);
+                
+        }
+
         public void print_symbols_table(){
                 for (String key: symbols_table.keySet()) {
                         System.out.println("Tabla de simbolos: \n" + key);
@@ -530,7 +553,7 @@ inicio ::= funciones main
                 ;
 
 //Símbolo inicial del programa
-ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); :};
+ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); print_cod_mips(); :};
 
 //Operando numérico que posteriormente podrá ser utilizado para operaciones númericas y racionales
 operando ::=  INTEGER_LITERAL:a 
@@ -751,7 +774,11 @@ returnD ::= returnC ident:a finalExpre{: retornoActual=a.toString(); RESULT = "r
 valorIndizado ::= ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = a+" = ["+b.toString()+"]"; :};
 
 //Definición de la función print
-print ::= printC aperturaP STRING_LITERAL:a cerraduraP {: RESULT = "print("+a+")"; :};
+print ::= printC aperturaP STRING_LITERAL:a cerraduraP 
+                {: 
+                        RESULT = "print("+a+")"; 
+                        print_mips(a.toString());
+                :};
 
 //Definición de la función input
 input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
