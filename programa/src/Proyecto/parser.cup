@@ -18,6 +18,8 @@ action code{:
         String retornoActual;
         HashMap<String, ArrayList<String>> symbols_table = new HashMap<String, ArrayList<String>>();
         String current_hash;
+        StringBuffer cod3D = new StringBuffer();
+        int currentTemp = 1;
 
         public void print_symbols_table(){
                 for (String key: symbols_table.keySet()) {
@@ -531,13 +533,54 @@ inicio ::= funciones main
 ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); :};
 
 //Operando numérico que posteriormente podrá ser utilizado para operaciones númericas y racionales
-operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString();:}
-            | FLOAT_LITERAL:a {: RESULT = a.toString(); :}
-            | ident:a {: RESULT = a; :}
-            | funcionAsig:a {: RESULT = a; :}
-            | operacionSumaUna:a {: RESULT = a; :}
-            | operacionRestaUna:a {: RESULT = a; :}
-            | valorIndizado:a {: RESULT = a; :}
+operando ::=  INTEGER_LITERAL:a 
+                        {: 
+                                String temp = "t"+(currentTemp++);
+                                cod3D.append("\n" + temp + " = " + a.toString());
+                                //RESULT = a.toString() + "::" + temp;
+                                System.out.println("Codigo 3D: " + a.toString() + "::" + temp);
+                                RESULT = a.toString(); 
+                        :}
+            | FLOAT_LITERAL:a 
+                        {: 
+                                String temp = "t"+(currentTemp++);
+                                cod3D.append("\n" + temp + " = " + a.toString());
+                                //RESULT = a.toString() + "::" + temp;
+                                System.out.println("Codigo 3D: " + a.toString() + "::" + temp);
+                                RESULT = a.toString(); 
+                        :}
+            | ident:a 
+                        {: 
+                                String temp = "t"+(currentTemp++);
+                                cod3D.append("\n" + temp + " = " + a.toString());
+                                //RESULT = a.toString() + "::" + temp;
+                                System.out.println("Codigo 3D: " + a.toString() + "::" + temp);
+                                RESULT = a; 
+                        :}
+            | funcionAsig:a 
+                        {: 
+                                String temp = "t"+(currentTemp++);
+                                cod3D.append("\n" + temp + " = " + a.toString());
+                                //RESULT = a.toString() + "::" + temp;
+                                System.out.println("Codigo 3D: " + a.toString() + "::" + temp);
+                                RESULT = a;  
+                        :}
+            | operacionSumaUna:a 
+                        {: 
+                                String temp = "t"+(currentTemp++);
+                                cod3D.append("\n" + temp + " = " + a.toString());
+                                //RESULT = a.toString() + "::" + temp;
+                                System.out.println("Codigo 3D: " + a.toString() + "::" + temp);
+                                RESULT = a;  
+                        :}
+            | operacionRestaUna:a 
+                        {: 
+                                String temp = "t"+(currentTemp++);
+                                cod3D.append("\n" + temp + " = " + a.toString());
+                                //RESULT = a.toString() + "::" + temp;
+                                System.out.println("Codigo 3D: " + a.toString() + "::" + temp);
+                                RESULT = a; 
+                        :}
             ;
 
 //operación aritmétrica simple, compuesta de dos operandos
@@ -545,18 +588,50 @@ operacionNumSim ::= operando:a operacionArit:b operando:c
                 {:
                         comprobarOperando(a.toString());
                         comprobarOperando(c.toString());
+                        String[] partesOperacion1 = a.toString().split("::");
+                        String[] partesOperacion2 = c.toString().split("::");
+                        String temp = "t" + (currentTemp++);
+                        cod3D.append ("\n" + temp + " = " + partesOperacion1[0] + b.toString() + partesOperacion2[0]);
+                        //RESULT = partesOperacion1[0] + b.toString() + partesOperacion2[0] + "::" + temp;
+                        System.out.println("Codigo 3D: " + partesOperacion1[0] + b.toString() + partesOperacion2[0] + "::" + temp);
                         RESULT = a+" "+b+" "+c; 
                 :}
                 | aperturaP operando:a operacionArit:b operando:c cerraduraP 
                 {: 
                         comprobarOperando(a.toString());
                         comprobarOperando(c.toString());
+                        String[] partesOperacion1 = a.toString().split("::");
+                        String[] partesOperacion2 = c.toString().split("::");
+                        String temp = "t" + (currentTemp++);
+                        cod3D.append ("\n" + temp + " = " + partesOperacion1[0] + b.toString() + partesOperacion2[0]);
+                        //RESULT = partesOperacion1[0] + b.toString() + partesOperacion2[0] + "::" + temp;
+                        System.out.println("Codigo 3D: " + partesOperacion1[0] + b.toString() + partesOperacion2[0] + "::" + temp);
                         RESULT = "("+a+" "+b+" "+c+")"; 
                 :};
 
 
-operacionNum ::= operacionNum:a operacionArit:b operando:c {: comprobarOperando(c.toString()); RESULT = a+" "+b+" "+c; :}
-                | aperturaP operacionNum:a operacionArit:b operando:c cerraduraP {: comprobarOperando(c.toString()); RESULT = "("+a+" "+b+" "+c+")"; :}
+operacionNum ::= operacionNum:a operacionArit:b operando:c 
+                        {: 
+                                comprobarOperando(c.toString()); 
+                                String[] partesOperacion1 = a.toString().split("::");
+                                String[] partesOperacion2 = c.toString().split("::");
+                                String temp = "t" + (currentTemp++);
+                                cod3D.append ("\n" + temp + " = " + partesOperacion1[0] + b.toString() + partesOperacion2[0]);
+                                //RESULT = partesOperacion1[0] + b.toString() + partesOperacion2[0] + "::" + temp;
+                                System.out.println("Codigo 3D: " + partesOperacion1[0] + b.toString() + partesOperacion2[0] + "::" + temp);
+                                RESULT = a+" "+b+" "+c; 
+                        :}
+                | aperturaP operacionNum:a operacionArit:b operando:c cerraduraP 
+                        {: 
+                                comprobarOperando(c.toString()); 
+                                String[] partesOperacion1 = a.toString().split("::");
+                                String[] partesOperacion2 = c.toString().split("::");
+                                String temp = "t" + (currentTemp++);
+                                cod3D.append ("\n" + temp + " = " + partesOperacion1[0] + b.toString() + partesOperacion2[0]);
+                                //RESULT = partesOperacion1[0] + b.toString() + partesOperacion2[0] + "::" + temp;
+                                System.out.println("Codigo 3D: " + partesOperacion1[0] + b.toString() + partesOperacion2[0] + "::" + temp);
+                                RESULT = "("+a+" "+b+" "+c+")"; 
+                        :}
                 | operacionNumSim:a {: RESULT = a; :}
                 ;
 
@@ -865,15 +940,3 @@ operacionRac ::= menor {: RESULT = "<"; :}
 operacionLog ::= conjuncion {: RESULT = "^"; :}
                 |disyuncion {: RESULT = "#"; :}
                 ;
-
-int main(){
-        do{
-                print("Indique un numero: ");
-                int num = read();
-                num = num+1;
-                print("\nel incremento es: ");
-                print(num);
-        }while(num > 0 && num < 100);
-        print("adios");
-}
-
