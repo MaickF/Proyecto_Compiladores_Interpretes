@@ -106,7 +106,7 @@ punto = "."
 //Definición de tokens
 
 /* keywords */
-<YYINITIAL> "boolean"            { return symbol(sym.BOOLEAN); }
+<YYINITIAL> "bool"            { return symbol(sym.BOOLEAN); }
 <YYINITIAL> "int"                { return symbol(sym.INT); }
 <YYINITIAL> "char"               { return symbol(sym.CHAR); }
 <YYINITIAL> {string}             { return symbol(sym.STRING); }
@@ -160,7 +160,6 @@ punto = "."
 {mayorIgual}            { return symbol(sym.mayorIgual); }
 {mayor}                 { return symbol(sym.mayor); }
 {diferente}             { return symbol(sym.diferente); }
-{letra}                 {return symbol(sym.letra);}
 {numeroE}                {return symbol(sym.INTEGER_LITERAL, yytext());}
 {numeroF}                {return symbol(sym.FLOAT_LITERAL, yytext());}
 {bool}                  {return symbol(sym.bool, yytext());}

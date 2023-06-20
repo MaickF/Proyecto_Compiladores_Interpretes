@@ -1,13 +1,8 @@
-int residuo (int num){
-        int num = 1$
-        return num$
-    }
-
-int main() {
-    int temp = 12 ** residuo(num)$
+int saludosnt() {
+    int temp = 12 ** 5$
     if (temp == 12 # !xd)
         {
-            int temp1 = read()$ 
+            int temp1 = 4$ 
             int temp2 = temp - temp$
             break$
         }
@@ -18,5 +13,41 @@ int main() {
     string miString = "num"$
     int numero = 45 / 34 ~ 4$
     print("numero")$
+    return numero$
 }
 
+int saludos(int x,int y) {
+    int temp = 12 ** 5$
+    if (temp == 12 # !xd)
+        {
+            int temp1 = 4$ 
+            int temp2 = temp - temp$
+            break$
+        }
+    else
+        { 
+            int temp3 = var+23$
+        }
+    string miString = "num"$
+    int numero = 45 / 34 ~ 4$
+    print("numero")$
+    return numero$
+}
+
+int main() {
+    int temp = 12 ** saludos(2, 3)$
+    if (temp == 12 # !xd)
+        {
+            int temp1 = 4$ 
+            int temp2 = temp - temp$
+            break$
+        }
+    else
+        { 
+            int temp3 = var+23$
+        }
+    string miString = "num"$
+    int numero = 45 / 34 ~ 4$
+    print("numero")$
+    return numero$
+}

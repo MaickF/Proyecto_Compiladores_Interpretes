@@ -7,12 +7,193 @@ import java_cup.runtime.*;
 import java.util.HashMap;
 import java.util.Hash;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 //Inicialización de l hasmap para desarrollar las tablas de símbolos
 action code{:
+        ArrayList<String> variables = new ArrayList<String>();
+        ArrayList<String> errores = new ArrayList<String>();
+        String operandosArit = "int";
+        boolean error = false;
+        boolean operandosBool = false;
+
+        String retornoActual;
         HashMap<String, ArrayList<String>> symbols_table = new HashMap<String, ArrayList<String>>();
+
         String current_hash;
+        StringBuffer cod3D = new StringBuffer();
+        int currentTemp = 1;
+
+        StringBuffer cod_mips_data = new StringBuffer();
+        StringBuffer cod_mips_text = new StringBuffer();
+        int currentVar = 0;
+
+        public void if_mips(String condition) {
+                StringBuilder mipsCode = new StringBuilder();
+                int currentSerial = ifSerial++;
+                String ifLabel = "if_" + currentSerial;
+                String trueLabel = "if_true_" + currentSerial;
+                String falseLabel = "if_false_" + currentSerial;
+                String endLabel = "if_end_" + currentSerial;
+                mipsCode.append("# Evaluación de la condición del if").append("\n");
+                mipsCode.append("    ").append(generateMIPSCondition(condition, trueLabel, falseLabel)).append("\n");
+                mipsCode.append(ifLabel).append(":").append("\n");
+                mipsCode.append("# Código MIPS para la rama verdadera del if").append("\n");
+                mipsCode.append(trueLabel).append(":").append("\n");
+                mipsCode.append("    # Resto del código de la rama verdadera").append("\n");
+                mipsCode.append("    j ").append(endLabel).append("\n");
+                mipsCode.append("# Código MIPS para el final del if").append("\n");
+                mipsCode.append(falseLabel).append(":").append("\n");
+                mipsCode.append("    # Resto del código de la rama falsa").append("\n");
+                mipsCode.append(endLabel).append(":").append("\n");
+        }
+
+        public static String buildWhileExpression(String condition) {
+        StringBuilder mipsCode = new StringBuilder();
+
+        // Generar el serial para el bucle "while" actual
+        int currentSerial = whileSerial++;
+
+        // Etiquetas para el bucle "while"
+        String whileLabel = "while_" + currentSerial;
+        String endLabel = "end_" + currentSerial;
+
+        // Código MIPS para evaluar la condición
+        mipsCode.append("# Evaluación de la condición del while").append("\n");
+        mipsCode.append(whileLabel).append(":").append("\n");
+        mipsCode.append("    ").append(generateMIPSCondition(condition, endLabel)).append("\n");
+
+        // Código MIPS para el cuerpo del bucle "while"
+        mipsCode.append("# Código MIPS para el cuerpo del while").append("\n");
+        mipsCode.append("    # Resto del código dentro del while").append("\n");
+
+        // Salto al inicio del bucle "while" si la condición se cumple
+        mipsCode.append("    j ").append(whileLabel).append("\n");
+
+        // Etiqueta del final del bucle "while"
+        mipsCode.append(endLabel).append(":").append("\n");
+
+        return mipsCode.toString();
+    }
+
+    public static String buildForLoop(int lowerLimit, int upperLimit) {
+        StringBuilder mipsCode = new StringBuilder();
+
+        // Generar el serial para el bucle "for" actual
+        int currentSerial = forSerial++;
+
+        // Etiquetas para el bucle "for"
+        String forLabel = "for_" + currentSerial;
+        String endLabel = "end_" + currentSerial;
+
+        // Código MIPS para inicializar el contador
+        mipsCode.append("# Inicialización del contador del bucle for").append("\n");
+        mipsCode.append("    li $t0, ").append(lowerLimit).append("\n");
+
+        // Etiqueta del inicio del bucle "for"
+        mipsCode.append(forLabel).append(":").append("\n");
+
+        // Código MIPS para evaluar la condición del bucle
+        mipsCode.append("# Evaluación de la condición del bucle for").append("\n");
+        mipsCode.append("    slti $t1, $t0, ").append(upperLimit).append("\n");
+        mipsCode.append("    beq $t1, $zero, ").append(endLabel).append("\n");
+
+        // Código MIPS para el cuerpo del bucle "for"
+        mipsCode.append("# Código MIPS para el cuerpo del bucle for").append("\n");
+        mipsCode.append("    # Resto del código dentro del bucle for").append("\n");
+
+        // Código MIPS para incrementar el contador
+        mipsCode.append("# Incremento del contador del bucle for").append("\n");
+        mipsCode.append("    addi $t0, $t0, 1").append("\n");
+
+        // Salto al inicio del bucle "for"
+        mipsCode.append("    j ").append(forLabel).append("\n");
+
+        // Etiqueta del final del bucle "for"
+        mipsCode.append(endLabel).append(":").append("\n");
+
+        return mipsCode.toString();
+    }
+
+        public void print_mips(String print_string){
+                System.out.println("Entro al print");
+                String string_var_name = "var" + currentVar;
+                currentVar++;
+                cod_mips_data.append(string_var_name + ": .asciiz \"" + print_string + "\\n\"\n");
+                cod_mips_text.append("li $v0, 4\n");
+                cod_mips_text.append("la $a0, " + string_var_name + "\n");
+                cod_mips_text.append("syscall\n");
+        }
+
+        public void function_mips(String nombre, String parametros){
+                String etiqueta = nombre + ":\n";
+                cod_mips_text.append(etiqueta);
+                 String[] listaParametros = parametros.split(",");
+                if(!parametros.equals("")){
+                        for (String parametro : listaParametros) {
+                                String ajusteParam = parametro.trim();
+
+                                String[] divisionParam = ajusteParam.split(" ");
+
+                                String tipo = divisionParam[0];
+                                String nombreParam = divisionParam[1];
+
+                                generateMIPSParameter(tipo, nombreParam);
+                        }
+                }
+                
+        }
+
+        public void generateMIPSParameter(String tipo, String nombre) {
+                // Agregar el código MIPS para declarar el parámetro en el segmento de datos
+                cod_mips_data.append(nombre).append(": .").append(tipoParamMips(tipo));
+                cod_mips_data.append(" ").append(valorInicial(tipo)).append("\n");
+        }
+
+        public String tipoParamMips(String tipo) {
+                if (tipo.equals("int")) {
+                        return "word";
+                } else if (tipo.equals("String")) {
+                        return "asciiz";
+                } else if (tipo.equals("char")) {
+                        return "byte";
+                } else if (tipo.equals("float")) {
+                        return "float";
+                } else {
+        // Tipo de dato desconocido, retorna una directiva vacía
+                        return "";
+                }
+        }
+
+        public String valorInicial(String tipo) {
+                if (tipo.equals("int")) {
+                        return "0";
+                } else if (tipo.equals("String")) {
+                        return "\"\"";
+                } else if (tipo.equals("char")) {
+                        return "'\0'";
+                } else if (tipo.equals("float")) {
+                        return "0.0";
+                } else {
+                        // Tipo de dato desconocido, retorna un valor vacío
+                        return "";
+                }
+        }
+
+        public void print_cod_mips(){
+                System.out.println("Codigo en MIPS");
+                System.out.println(".data\n");
+                System.out.println(cod_mips_data);
+                System.out.println(".text\n");
+                System.out.println(cod_mips_text);
+                
+        }
+
+
         public void print_symbols_table(){
+                for (int i = errores.size()-1; i>0; i--) {
+                        System.out.println("ERROR: "+ errores.get(i));
+                }
                 for (String key: symbols_table.keySet()) {
                         System.out.println("Tabla de simbolos: \n" + key);
                         System.out.println("Valores: ");
@@ -23,8 +204,230 @@ action code{:
                 }
         }
 
+
+
+        public void comprobarOperando(String operando){
+                String tipo = verificarTipoVariable(operando);
+                if(operandosArit.equals("error")){
+                        System.out.println("Error previo en la operacion");
+                }else{
+                        if(tipo.equals("identifier")){
+                                String tipoIdentificador = obtenerTipoVariable(operando.toString());
+                                if(tipoIdentificador.equals("")){
+                                        operandosArit = "error";
+                                }else if(operandosArit.equals("float") && tipoIdentificador.equals("int")){
+                                        operandosArit="float";
+                                }else if(tipoIdentificador.equals("float")){
+                                        operandosArit="float";
+                                }else if(operandosArit.equals("int") && tipoIdentificador.equals("int")){
+                                        operandosArit = "int";
+                                }else{
+                                        operandosArit = "error";
+                                        String err="El identicador: "+operando+" no coincide con el tipo de la operacion";
+                                        errores.add(err);
+                                }
+                        }else if(tipo.equals("function")){
+                                String tipoIdentificador = parametrosFuncionAsig(operando);
+                                System.out.println(tipoIdentificador);
+                                if(tipoIdentificador.equals("error")){
+                                        System.out.println("La funcion no es valida");
+                                        operandosArit = "error";
+                                        String err="La funcion: "+operando+" no coincide con el tipo de la operacion";
+                                        errores.add(err);
+                                }else if(operandosArit.equals("float") && tipoIdentificador.equals("int")){
+                                        operandosArit="float";
+                                }else if(tipoIdentificador.equals("float")){
+                                        operandosArit="float";
+                                }else if(operandosArit.equals("int") && tipoIdentificador.equals("int")){
+                                        operandosArit = "int";
+                                }else{
+                                        operandosArit = "error";
+                                        String err="El operando: "+operando+" no coincide con el tipo de la operacion";
+                                        errores.add(err);
+                                }
+                        }else if(operandosArit.equals("int") && tipo.equals("int")){
+                                	operandosArit = "int";
+                        }else if(operandosArit.equals("float") && tipo.equals("int")){
+                                operandosArit = "float";
+                        }else if(operandosArit.equals("int") && tipo.equals("float")){
+                                operandosArit = "float";
+                        }else if(operandosArit.equals("float") && tipo.equals("float")){
+                                operandosArit = "float";
+                        }else{
+                                operandosArit = "error";
+                                String err="El operando: "+operando+" no coincide con el tipo de la operacion";
+                                errores.add(err);
+                        }
+                }
+        }
+
+        public void comprobarOperandoBool(String operando){
+                String tipo = verificarTipoVariable(operando);
+                if(operandosArit.equals("error")){
+                        operandosBool=true;
+                        System.out.println("Error en operacion relacional");
+                }else{
+                        if(tipo.equals("identifier")){
+                                String tipoIdentificador = obtenerTipoVariable(operando.toString());
+                                if(tipoIdentificador.equals("bool")){
+                                        System.out.println("Operando valido");
+                                }else{
+                                        operandosBool=true;
+                                        String err="El identificador: "+operando+" no coincide con el tipo de la operacion";
+                                        errores.add(err);
+                                }
+                        }else if(tipo.equals("function")){
+                                String tipoIdentificador = parametrosFuncionAsig(operando);
+                                System.out.println(tipoIdentificador);
+                                if(tipoIdentificador.equals("bool")){
+                                        System.out.println("La funcion es valida");
+                                }else{
+                                        operandosBool=true;
+                                        String err="La funcion: "+operando+" no coincide con el tipo de la operacion";
+                                        errores.add(err);
+                                }
+                        }else if(tipo.equals("bool")){
+                                	System.out.println("La funcion es valida");
+                        }else{
+                               operandosBool=true;
+                               String err="El operando: "+operando+" no coincide con el tipo de la operacion";
+                                        errores.add(err);
+                        }
+                }
+        }
+
+        public String parametrosFuncionAsig(String funcionAsig){
+                ArrayList<String> nombreParams = obtenerNombreYParametros(funcionAsig);
+                ArrayList<String> nombre = symbols_table.get(nombreParams.get(nombreParams.size()-1));
+                System.out.println(nombre);
+                if(nombre!=null){
+                        System.out.println("La funcion existe");
+                        ArrayList<String> tiposB = extraerTiposParametros2(nombreParams.get(nombreParams.size()-1));
+                        if(nombreParams.size()-1==tiposB.size()){
+                                if(nombreParams.size()==1){
+                                        return nombre.get(nombre.size()-1);
+                                }else if(nombreParams.size()>1){
+                                        ArrayList<String> tiposA =  new ArrayList<String>();
+                                        for(int i = 0; i < nombreParams.size()-1; i++){
+                                                String tipo = verificarTipoVariable(nombreParams.get(i));
+                                                if(tipo.equals("identifier")){
+                                                        String tipoE = obtenerTipoVariable(nombreParams.get(i));
+                                                        if(tipoE.equals("")){
+                                                                return "error";
+                                                        }else{
+                                                                tiposA.add(tipoE);
+                                                        }
+                                                }else if(tipo.equals("function")){
+                                                        String tipoE = parametrosFuncionAsig(nombreParams.get(i));
+                                                        if(tipoE.equals("error")){
+                                                                return "error";
+                                                        }else{
+                                                                tiposA.add(tipoE);
+                                                        }
+                                                }else{
+                                                        tiposA.add(tipo);
+                                                }
+                                        }
+                                                System.out.println(tiposA);
+                                                System.out.println(tiposB);
+                                        if(compararListas(tiposA, tiposB)){
+                                                return nombre.get(nombre.size()-1);
+                                        }else{
+                                                return "error";
+                                        }
+                                }else{
+                                        return "error";
+                                }
+                        }else{
+                                return "error";
+                        }
+                }else{
+                        return "error";
+                }
+        }
+
+        public ArrayList<String> obtenerLista(String lista) {
+                ArrayList<String> resultado = new ArrayList<>();
+
+                if (lista.contains(",")) {
+                String[] listaConvert = lista.split(",");
+                        for (String  elemento : listaConvert) {
+                                resultado.add(elemento);
+                        }
+                } else {
+                        resultado.add(lista);
+                }
+
+                return resultado;
+        }
+
+        public void validarArreglo(String tipo, String nombre, String tamanho, String lista){
+                System.out.println("validando arreglo: "+nombre);
+                ArrayList<String> listaConvert = obtenerLista(lista);
+                System.out.println(listaConvert);
+                String tipoTamanho = verificarTipoVariable(tamanho);
+                boolean tamanhoValid = validarArregloTamanho(lista, tamanho, listaConvert, tipoTamanho);
+                boolean tipoValid = validarArregloTipo(listaConvert, tipo);
+                System.out.println(tamanhoValid);
+                System.out.println(tipoValid);
+                if(tamanhoValid && tipoValid){
+                        String variableNueva = nombre + ":" + tipo;
+                        variables.add(variableNueva);
+                }else{
+                        errores.add("El arreglo no esta declarado correctamente");
+                }
+        }
+
+        public boolean validarArregloTamanho(String lista, String tamanho, ArrayList<String> listaConvert, String tipoTamanho){
+                boolean result = false;
+                if(tipoTamanho.equals("int")){
+                        int tamanhoN = Integer.parseInt(tamanho);
+                        System.out.println(tamanhoN);
+                        if(listaConvert.size() <= tamanhoN){
+                                result = true;
+                        }
+                }else if(tipoTamanho.equals("identifier")){
+
+                }else if(tipoTamanho.equals("function")){
+
+                }
+                return result;
+        }
+
+        public boolean validarArregloTipo(ArrayList<String> listaConvert, String tipo){
+                int result = 0;
+                for(int i=0; i<listaConvert.size(); i++){
+                        String elemento = listaConvert.get(i);
+                        String tipoElemento = verificarTipoVariable(elemento);
+                        if(tipoElemento.equals(tipo)){
+                                result++;
+                        }else if(tipoElemento.equals("identifier")){
+                                String tipoElemento2 = obtenerTipoVariable(elemento);
+                                if(tipoElemento2.equals(tipo)){
+                                        result++;
+                                }else{
+                                        break;
+                                }
+                        }else if(tipoElemento.equals("function")){
+                                String tipoFuncion = parametrosFuncionAsig(elemento);
+                                if(tipoFuncion.equals(tipo)){
+                                        result++;
+                                }else{
+                                        break;
+                                }
+                        }else{
+                                break;
+                        }
+                }
+                if(result == listaConvert.size()){
+                        return true;
+                }else{
+                        return false;
+                }
+        }
+
         public String obtenerTipoVariable(String variable) {
-                String[] tipos = {"int","char","string","boolean","float"};
+                String[] tipos = {"int","char","string","bool","float"};
                 int cuenta = 0;
                 String resultado = "";
                 for(int i=0; i<tipos.length; i++){
@@ -40,100 +443,88 @@ action code{:
         public boolean existeVariable(String nombre, String tipo){
                 String muestra = nombre+":"+tipo;
                 String muestra2 = "parametro:"+muestra;
-                if (symbols_table.get(current_hash).contains(muestra) || symbols_table.get(current_hash).contains(muestra2)){
+                if (variables.contains(muestra) || variables.contains(muestra2)){
                         return true;
                 }else{
                         return false;
                 }
         }
 
-        public void comprobarVariable(String tipo, String nombre){
-                boolean existencia = obtenerTipoVariable(nombre);
+        public void comprobarVariable(String tipo, String nombre, boolean param){
+                String existencia = obtenerTipoVariable(nombre);
                 if(existencia.equals("")){
                         System.out.println("PARSER: identificardor: " + tipo);
-                        String nuevo = nombre + ":" + tipo;
-                        symbols_table.get(current_hash).add(nuevo);
-                }else{
-                        System.out.println("La variable:" + nombre + "ya existe en esta función");
-                }
-        }
-
-        public void comprobarFuncion(String tipo, String nombre, String param, Object ValorRetorno){
-                if(!(param.equals(""))){
-                        boolean verificarParam = verificarNombresParametros(param);
-                        if(!verificarParam){
-                                String tipoValorRetorno = verificarTipoVariable(valorRetorno);
-                                if(tipoValorRetorno.equals("identifier")){
-                                        String existeValorRetorno=obtenerTipoVariable(tipoValorRetorno);
-                                        if(existeValorRetorno.equals(tipo)){
-                                                existeFuncion(nombre, tipo);
-                                        }else{
-                                                System.out.println("");
-                                        }
-                                }else{
-                                        if(tipoValorRetorno.equals(tipo)){
-                                                existeFuncion(nombre, tipo);
-                                        }else{
-                                                System.out.println("");
-                                        }
-                                }
-                                
+                        if(param){
+                                String nuevo = "parametro:" + nombre + ":" + tipo;
+                                variables.add(nuevo);
                         }else{
-                               System.out.println("Parametros repetidos"); 
+                                String nuevo = nombre + ":" + tipo;
+                                variables.add(nuevo);
                         }
                 }else{
-                        String tipoValorRetorno = verificarTipoVariable(valorRetorno);
-                        if(tipoValorRetorno.equals("identifier")){
-                                String existeValorRetorno=obtenerTipoVariable(tipoValorRetorno);
-                                if(existeValorRetorno.equals(tipo)){
-                                        existeFuncion(nombre, tipo);
-                                }else{
-                                        System.out.println("");
-                                }
+                        if(param){
+                                error = true;
+                                errores.add("Parametro:" + nombre + "repetido, por favor solucione el error para crear la funcion");
                         }else{
-                                if(tipoValorRetorno.equals(tipo)){
-                                        existeFuncion(nombre, tipo);
-                                }else{
-                                        System.out.println("");
-                                }
+                                errores.add("La variable:" + nombre + "ya existe en esta función");                                
                         }
                 }
         }
 
-        public boolean existeFuncion(String nombre, String tipo, String params){
+        public void comprobarFuncion(String tipo, String nombre, String param){
+                String tipoValorRetorno = verificarTipoVariable(retornoActual);
+                System.out.println(nombre);
+                System.out.println(tipoValorRetorno);
+                System.out.println(tipo);
+                if(tipoValorRetorno.equals("identifier")){
+                        String existeValorRetorno=obtenerTipoVariable(retornoActual.toString());
+                        if(existeValorRetorno.equals(tipo)){
+                                existeFuncion(nombre, tipo, param);
+                        }else{
+                                errores.add("Retorno invalido");
+                                error=true;
+                        }
+                }else{
+                        if(tipoValorRetorno.equals(tipo)){
+                                        existeFuncion(nombre, tipo, param);
+                        }else{
+                                errores.add("Retorno invalido");
+                                error=true;
+                        }
+                }
+                
+        }
+
+        public void existeFuncion(String nombre, String tipo, String params){
                 if (symbols_table.get(nombre)==null){
-                        System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                        ArrayList<String> funcionMain = new ArrayList<String>();
+                        System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                         current_hash = nombre;
-                        funcionMain.add(tipo);
-                        symbols_table.put(current_hash, funcionMain);
+                        variables.add(tipo);
+                        symbols_table.put(current_hash, variables);
                 }else{
                         String tipoEncontrado = symbols_table.get(nombre).get(0);
                         if(!(tipo.equals(tipoEncontrado))){
-                                System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                                ArrayList<String> funcionMain = new ArrayList<String>();
+                                System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                                 current_hash = nombre;
-                                funcionMain.add(tipo);
-                                symbols_table.put(current_hash, funcionMain);
+                                variables.add(tipo);
+                                symbols_table.put(current_hash, variables);
                         }else{
-                                int params1 = extraerTiposParametros1(params);
+                                ArrayList<String> params1 = extraerTiposParametros1(params);
                                 ArrayList<String> params2 = extraerTiposParametros2(nombre);
                                 if(params1.size()==params2.size()){
                                         if(compararListas(params1, params2)){
                                                 System.out.println("La funcion ya existe");
                                         }else{
-                                                System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                                                ArrayList<String> funcionMain = new ArrayList<String>();
+                                                System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                                                 current_hash = nombre;
-                                                funcionMain.add(tipo);
-                                                symbols_table.put(current_hash, funcionMain);
+                                                variables.add(tipo);
+                                                symbols_table.put(current_hash, variables);
                                         }
                                 }else{
-                                        System.out.println("/_Nueva tabla de simbolos_/:  " + b);
-                                        ArrayList<String> funcionMain = new ArrayList<String>();
+                                        System.out.println("/_Nueva tabla de simbolos_/:  " + nombre);
                                         current_hash = nombre;
-                                        funcionMain.add(tipo);
-                                        symbols_table.put(current_hash, funcionMain);
+                                        variables.add(tipo);
+                                        symbols_table.put(current_hash, variables);
                                 }
                         }       
                 }
@@ -154,17 +545,42 @@ action code{:
 
         public ArrayList<String> extraerTiposParametros2(String nombre) {
                 ArrayList<String> tipos = new ArrayList<String>();
-                String tamanho = symbols_table.get(nombre).size();
-                if(tamanho>1){
-                        for (int i = 1; i < symbols_table.get(nombre).size(); i++) {
-                                String parametro = symbols_table.get(nombre).get();
+                int tamanho = symbols_table.get(nombre).size();
+                        for (int i = 0; i < symbols_table.get(nombre).size(); i++) {
+                                String parametro = symbols_table.get(nombre).get(i);
                                 String[] partes = parametro.split(":");
                                 if (partes.length >= 3) {
                                         tipos.add(partes[2]);
                                 }
                         }
-                }
                 return tipos;
+        }
+
+        public ArrayList<String> obtenerNombreYParametros(String expresion) {
+                // Eliminar espacios en blanco
+                expresion = expresion.replaceAll("\\s+", "");
+                System.out.println(expresion);
+
+                // Obtener el nombre de la función
+                int indiceParentesisAbre = expresion.indexOf('(');
+                String nombreFuncion = expresion.substring(0, indiceParentesisAbre);
+                System.out.println("Nombre de la función: " + nombreFuncion);
+
+                // Obtener la lista de parámetros
+                int indiceParentesisCierra = expresion.lastIndexOf(')');
+                String parametrosString = expresion.substring(indiceParentesisAbre + 1, indiceParentesisCierra);
+                if(parametrosString.isEmpty()){
+                        ArrayList<String> listaParametros = new ArrayList<String>();
+                        listaParametros.add(nombreFuncion);
+                        return listaParametros;
+                }else{
+                        String[] parametros = parametrosString.split(",");
+                        ArrayList<String> listaParametros = new ArrayList<>(Arrays.asList(parametros));
+                        listaParametros.add(nombreFuncion);
+                        System.out.println("Lista de parámetros: " + listaParametros);
+                        return listaParametros;
+                }
+                
         }
 
         public boolean compararListas(ArrayList<String> lista1, ArrayList<String> lista2) {
@@ -195,68 +611,140 @@ action code{:
                 return false;
         }
 
-        public void verificarAsignacion(String nombre, Object valor){
+        public void verificarAsignacion(String nombre, String valor){
                 String existencia = obtenerTipoVariable(nombre);
                 if(existencia.equals("")){
                         System.out.println("Esta variable no existe");
                 }else{
                         String tipo = verificarTipoVariable(valor);
                         if(tipo.equals(existencia)){
-                                System.out.println("good");
+                                System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                         }else if(tipo.equals("identifier")){
                                 String existencia2 = obtenerTipoVariable(valor.toString());
                                 if(existencia.equals(existencia2) && !(nombre.equals(valor))){
-                                        System.out.println("good");
+                                        System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                                 }else{
-                                        System.out.println("La variable asignada no coincide");
+                                        errores.add("La variable:" + nombre +"no coincide con el valor de: "+valor);
+                                }
+                        }else if(tipo.equals("function")){
+                                String tipoFuncion = parametrosFuncionAsig(valor);
+                                if(tipoFuncion.equals("error")){
+                                        errores.add("La variable:" + nombre +"no coincide con el valor de: "+valor);
+                                }else if(tipoFuncion.equals(existencia)){
+                                        System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
+                                }else{
+                                        errores.add("La variable:" + nombre +"no coincide con el valor de: "+valor);
                                 }
                         }else{
-                                System.out.println("El tipo del valor no coincide");
+                                errores.add("La variable:" + nombre +"no coincide con el valor de: "+valor);
                         }
                 }
         }
 
-        public void verificarInicializacion(String nombre, String tipo, Object valor){
-                String existencia = existeVariable(nombre, tipo);
+        public void verificarInicializacion(String nombre, String tipo, String valor){
+                System.out.println("Entro a verificar inicializacion");
+                System.out.println("El valor a evaluar es: "+valor);
+                System.out.println("\n");
+                boolean existencia = existeVariable(nombre, tipo);
                 if(existencia){
-                        System.out.println("Esta variable ya existe");
+                        errores.add("La variable: "+ nombre + "ya existe");
                 }else{
-                        String tipo = verificarTipoVariable(valor);
-                        if(tipo.equals(tipo)){
-                                System.out.println("good");
-                        }else if(tipo.equals("identifier")){
+                        String tipo2 = verificarTipoVariable(valor);
+                        if(tipo.equals(tipo2)){
+                                System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
+                                variables.add(nombre+":"+tipo);
+                        }else if(tipo2.equals("identifier")){
                                 String existencia2 = obtenerTipoVariable(valor.toString());
-                                if(tipo.equals(existencia2) && !(nombre.equals(valor))){
-                                        System.out.println("good");
+                                if(tipo.equals(existencia2) && !(nombre.equals(valor.toString()))){
+                                        System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
+                                        variables.add(nombre+":"+tipo);
                                 }else{
-                                        System.out.println("La variable asignada no coincide");
+                                        errores.add("La variable:" + existencia2 +"no coincide con el valor de: "+tipo);
+                                }
+                        }else if(tipo2.equals("function")){
+                                String tipoFuncion = parametrosFuncionAsig(valor);
+                                if(tipoFuncion.equals("error")){
+                                        errores.add("La variable:" + nombre +"no coincide con el valor de: "+tipo);
+                                }else if(tipoFuncion.equals(tipo)){
+                                        System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
+                                        variables.add(nombre+":"+tipo);
+                                }else{
+                                        errores.add("La variable:" + tipoFuncion +"no coincide con el valor de: "+tipo);
                                 }
                         }else{
-                                System.out.println("El tipo del valor no coincide");
+                                errores.add("La variable:" + tipo2 +"no coincidaaaa con el valor de: "+tipo);
                         }
                 }
         }
 
-        public String verificarTipoVariable(Object variable) {
-                if (variable instanceof String) {
-                        String valor = (String) variable;
-                if (valor.startsWith("\"") && valor.endsWith("\"")) {
-                        return "String";
-                } else {
+
+        public String verificarTipoVariable(String variable) {
+                // Intentar parsear como entero
+                try {
+                        int entero = Integer.parseInt(variable);
+                        return "int";
+                } catch (NumberFormatException e) {
+                // No es un entero
+                }
+                // Intentar parsear como flotante
+                try {
+                        float flotante = Float.parseFloat(variable);
+                        return "float";
+                } catch (NumberFormatException e) {
+                        // No es un flotante
+                }
+                // Comprobar si es un carácter
+                if (variable.startsWith("'") && variable.endsWith("'")) {
+                        return "char";
+                }
+                if (variable.startsWith("@") || variable.equals("read()")) {
+                        return "string";
+                }else if(variable.startsWith("++") || variable.startsWith("--")){
+                        return "int";
+                }else if(variable.endsWith(")")){
+                        return "function";
+                }else if(variable.equals("true") || variable.equals("false")){
+                        return "bool";
+                }else{
                         return "identifier";
                 }
-                } else if (variable instanceof Integer) {
-                        return "int";
-                } else if (variable instanceof Boolean) {
-                        return "boolean";
-                } else if (variable instanceof Double) {
-                        return "double";
-                } else if (variable instanceof Character) {
-                        return "char";
-                } else {
-                        return "unknown";
-                }
         }
+        
+
+        public static boolean esOperacion(Object obj) {
+        if (obj instanceof String) {
+            String expresion = (String) obj;
+            String[] operadores = {"-", "+", "*", "**", "/"};
+            
+            for (String operador : operadores) {
+                if (expresion.contains(operador)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    public static boolean esOperacionBool(Object obj) {
+        if (obj instanceof String) {
+            String expresion = (String) obj;
+            String[] operadores = {"<", ">", "<=", "=>", "==", "#", "~", "!="};
+            
+            for (String operador : operadores) {
+                if (expresion.contains(operador)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+
+    public String hola(){
+        System.out.println("hola");
+        return "hola";
+    }
 :}
 
 parser code {:
@@ -295,12 +783,12 @@ terminal            FLOAT_LITERAL;
 non terminal expr, bloqueIf, bloqueElif, ifD, elif, elseD, doD, whileD, bloqueDoWhile, bloque, funMain;      // used to store evaluated subexpressions
 non terminal operando, operacionNum, operacionNumSim, condicion, condicionSim, operacionRacNum, operandoBool;
 non terminal tipoFuncion, tipoNum, operacionArit, operacionLog, operacionRac, sentencia, variableBool;
-non terminal grupoArreglo, lista, arregloSim, arregloAsig, arregloInd, forD, bloqueFor, expNegada, comentarioBloque;
+non terminal grupoArreglo, lista, arregloAsig, arregloInd, forD, bloqueFor, expNegada, comentarioBloque;
 // non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoVarArr,funcion, variableNum, comentarioLineal;
 non terminal returnD, input, print, param, funcionAsig, listaIdent, tipoArr, tipoVar, variableNum, comentarioLineal;
 non terminal variableAsig, variable,agrupacionVariable, declaracion, operacionSumaUna, operacionRestaUna;
 non terminal ini, inicio, main, funciones, iniFuncion, identFunc, opBloque, partIzqCreacion, identMain, listaParam;
-non terminal asignacion;
+non terminal asignacion, valorIndizado, expresionBool;
 
 /* Precedences */
 
@@ -325,22 +813,43 @@ start with ini;
 //                         symbols_table.get(current_hash).add(b.toString() + ": " + a.toString());
 //                 :};
 
-
-//Parte inicial de una función compuesta de un tipo y un identificador, ejemplo: "int miFuncion"
-identFunc ::= tipoFuncion:a ident:b 
-                {: 
-                        comprobarFuncion(a.toString(), b.toString());
-                :};
-
-//Parte inicial de la función main compuesta del terminal main y un tipo
-identMain ::= tipoFuncion:a mainC
-                {: 
-                        comprobarFuncion(a.toString(), "main");
-                :};
-
 //Definición de una función común, con posibilidad de contener parametros o no
-iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB {: comprobarFuncion(a.toString(), b.toString(), c.toString()); RESULT = a+" " + b"("+c+") {"+d+e+"}"; :}
-                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB {: comprobarFuncion(a.toString(), b.toString(), ""); RESULT = a+" " + b"() {"+c+d+"}"; :}
+iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloque:d returnD:e cerraduraB 
+                {: 
+                        if(error){
+                                System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
+                                error = false;
+                        }else{
+                                comprobarFuncion(a.toString(), b.toString(), c.toString()); 
+                                if(error){
+                                       System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
+                                        error = false; 
+                                }else{
+                                        RESULT = a+" " + b+"("+c+") {"+d+e+"}";
+                                        variables = new ArrayList<String>();
+                                        retornoActual = "";
+                                        function_mips(b.toString(), c.toString());
+                                }
+                        }
+                :}
+                |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB 
+                {: 
+                        if(error){
+                                System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
+                                error = false;
+                        }else{
+                                comprobarFuncion(a.toString(), b.toString(), "");
+                                if(error){
+                                     System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
+                                        error = false;   
+                                }else{
+                                        RESULT = a+" " + b+"() {"+c+d+"}"; 
+                                        variables = new ArrayList<String>();
+                                        retornoActual = "";
+                                        function_mips(b.toString(), c.toString());
+                                }
+                        }
+                :}
                 ;
 
 //Definición de un bloque que agrupa múltiples funciones
@@ -349,34 +858,45 @@ funciones ::= funciones iniFuncion:a {: System.out.println("/_Fin de tabla de si
                 ;
 
 //Definición de la función main
-main ::= identMain aperturaP cerraduraP aperturaB bloque returnD cerraduraB {: System.out.println("/_Fin de tabla de simbolos3: _/ : main"); :};
+main ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: comprobarFuncion(a.toString(), "main", ""); RESULT = a+" main() {"+b+c+"}"; function_mips("main", ""); :};
 
 //Agrupación de múltiples funciones, entre las que debe estar la función main
 inicio ::= funciones main
-                | main funciones
+                | main funciones 
                 | funciones main funciones
-                | main
+                | main 
                 ;
 
 //Símbolo inicial del programa
-ini ::= inicio {: print_symbols_table(); :};
+ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); print_cod_mips();:};
 
 //Operando numérico que posteriormente podrá ser utilizado para operaciones númericas y racionales
-operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString(); :}
+operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString();:}
             | FLOAT_LITERAL:a {: RESULT = a.toString(); :}
             | ident:a {: RESULT = a; :}
             | funcionAsig:a {: RESULT = a; :}
-            | operacionSumaUna
-            | operacionRestaUna
+            | operacionSumaUna:a {: RESULT = a; :}
+            | operacionRestaUna:a {: RESULT = a; :}
+            | valorIndizado:a {: RESULT = a; :}
             ;
 
 //operación aritmétrica simple, compuesta de dos operandos
-operacionNumSim ::= operando:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :}
-                | aperturaP operando:a operacionArit:b operando:c cerraduraP {: RESULT = "("+a+" "+b+" "+c+")"; :};
+operacionNumSim ::= operando:a operacionArit:b operando:c 
+                {:
+                        comprobarOperando(a.toString());
+                        comprobarOperando(c.toString());
+                        RESULT = a+" "+b+" "+c; 
+                :}
+                |aperturaP operando:a operacionArit:b operando:c cerraduraP 
+                {: 
+                        comprobarOperando(a.toString());
+                        comprobarOperando(c.toString());
+                        RESULT = "("+a+" "+b+" "+c+")"; 
+                :};
 
 
-operacionNum ::= operacionNum:a operacionArit:b operando:c {: RESULT = a+" "+b+" "+c; :}
-                | aperturaP operacionNum:a operacionArit:b operando:c cerraduraP {: RESULT = "("+a+" "+b+" "+c+")"; :}
+operacionNum ::= operacionNum:a operacionArit:b operando:c {: comprobarOperando(c.toString()); RESULT = a+" "+b+" "+c; :}
+                | aperturaP operacionNum:a operacionArit:b operando:c cerraduraP {: comprobarOperando(c.toString()); RESULT = "("+a+" "+b+" "+c+")"; :}
                 | operacionNumSim:a {: RESULT = a; :}
                 ;
 
@@ -395,22 +915,90 @@ operacionSumaUna ::= aumento ident:a {: RESULT = "++" + a; :};
 operacionRestaUna ::= decremento ident:a {: RESULT = "--" + a; :};
 
 //operacion racional de dos operandos númericos
-operacionRacNum ::= operando:a operacionRac:b operando:c {: RESULT = a+" "+b+" "+c ; :};
-
-//Operando booleanos que podrá ser utilizado después para operaciones booleanas
-operandoBool ::= aperturaP operandoBool:a cerraduraP {: RESULT = "("+a+")"; :}
-                |expNegada:a {: RESULT = a; :}
-                |bool:a {: RESULT = a; :}
-                | operacionRacNum:a {: RESULT = a; :}
-                | ident:a {: RESULT = a; :}
-                | funcionAsig:a {: RESULT = a; :}
+operacionRacNum ::= operando:a operacionRac:b operando:c 
+                {: 
+                    comprobarOperando(a.toString());
+                    comprobarOperando(c.toString());
+                    RESULT = a+" "+b+" "+c ;
+                   System.out.println(a+" "+b+" "+c);
+                :}
+                |operacionNum:a operacionRac:b operando:c
+                {: 
+                    comprobarOperando(a.toString());
+                    comprobarOperando(c.toString());
+                    RESULT = a+" "+b+" "+c ;
+                    System.out.println(a+" "+b+" "+c);
+                :}
+                |operando:a operacionRac:b operacionNum:c
+                {: 
+                    comprobarOperando(a.toString());
+                    comprobarOperando(c.toString());
+                    RESULT = a+" "+b+" "+c ;
+                    System.out.println(a+" "+b+" "+c);
+                :}
+                |operacionNum:a operacionRac:b operacionNum:c
+                {: 
+                    comprobarOperando(a.toString());
+                    comprobarOperando(c.toString());
+                    RESULT = a+" "+b+" "+c ;
+                    System.out.println(a+" "+b+" "+c);
+                :}
                 ;
 
+//Operando booleanos que podrá ser utilizado después para operaciones booleanas
+operandoBool ::= bool:a {: RESULT = a; :}
+                |ident:a {: RESULT = a; :}
+                |funcionAsig:a {: RESULT = a; :}
+                ;
+
+expresionBool ::= aperturaP operandoBool:a cerraduraP {: comprobarOperandoBool(a.toString()); RESULT = "("+a+")"; :}
+                | expNegada:a {: RESULT = a; :}
+                |operacionRacNum:a {: RESULT = a; :}
+                ;
+
+
 //Operación lógica simple de dos operandos booleanos
-condicionSim ::= operandoBool:a  operacionLog:b operandoBool:c {: RESULT = a+" "+b+" "+c; :};
+condicionSim ::= operandoBool:a  operacionLog:b operandoBool:c 
+                {: 
+                        comprobarOperandoBool(a.toString());
+                        comprobarOperandoBool(c.toString());
+                        RESULT = a+" "+b+" "+c; 
+                :}
+                |aperturaP operandoBool:a  operacionLog:b operandoBool:c cerraduraP
+                {: 
+                        comprobarOperandoBool(a.toString());
+                        comprobarOperandoBool(c.toString());
+                        RESULT = "(" + a+" "+b+" "+c + ")"; 
+                :}
+                |expresionBool:a  operacionLog:b expresionBool:c
+                |operandoBool:a  operacionLog:b expresionBool:c
+                {: 
+                        comprobarOperandoBool(a.toString());
+                        RESULT = "(" + a+" "+b+" "+c + ")"; 
+                :}
+                |expresionBool:a  operacionLog:b operandoBool:c
+                {: 
+                        comprobarOperandoBool(c.toString());
+                        RESULT = "(" + a+" "+b+" "+c + ")"; 
+                :}
+                |aperturaP expresionBool:a  operacionLog:b operandoBool:c cerraduraP
+                {: 
+                        comprobarOperandoBool(c.toString());
+                        RESULT = "(" + a+" "+b+" "+c + ")"; 
+                :}
+                |aperturaP operandoBool:a  operacionLog:b expresionBool:c cerraduraP
+                {: 
+                        comprobarOperandoBool(a.toString());
+                        RESULT = "(" + a+" "+b+" "+c + ")"; 
+                :}
+                |aperturaP expresionBool:a  operacionLog:b expresionBool:c cerraduraP
+                ;
 
 //Operación lógica compleja de una cantidad indefinida de operandos booleanos
-condicion ::= condicion:a operacionLog:b operandoBool:c {: RESULT = a+" "+b+" "+c; :}
+condicion ::= condicion:a operacionLog:b operandoBool:c {: comprobarOperandoBool(c.toString()); RESULT = a+" "+b+" "+c; :}
+            |aperturaP condicion:a operacionLog:b operandoBool:c cerraduraP {: comprobarOperandoBool(c.toString()); RESULT = "(" + a+" "+b+" "+c + ")"; :}
+            |condicion:a operacionLog:b expresionBool:c {: RESULT = a+" "+b+" "+c; :}
+            |aperturaP condicion:a operacionLog:b expresionBool:c cerraduraP {: RESULT = "(" + a+" "+b+" "+c + ")"; :}
             |condicionSim:a {: RESULT = a; :}
             ;
 
@@ -424,22 +1012,141 @@ variableBool ::= expNegada:a {: RESULT = a; :}
 //Expresión booleana negada
 expNegada ::= negacion expNegada:a {: RESULT = "!"+a; :}
              |negacion aperturaP condicion:a cerraduraP {: RESULT = "!"+"("+a+")"; :}
-             |negacion ident:a {: RESULT = a; :}
-             |negacion funcionAsig:a {: RESULT = a; :}
+             |negacion aperturaP operandoBool:a cerraduraP {: comprobarOperandoBool(a.toString()); RESULT = "!"+"("+a+")"; :}
+             |negacion aperturaP expresionBool:a cerraduraP {: RESULT = "!"+"("+a+")"; :}
              ;
 
 //Definición de una expresión if y sus variantes
-ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
-      |ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
-      |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
-      |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "if ("+a+"){"+b+"break$}"; :}
+ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB 
+                {: 
+                        comprobarOperandoBool(a.toString());
+                        if(operandosBool){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                        ;RESULT = "if ("+a+"){"+b+"}"; 
+                :}
+      |ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b BREAK cerraduraB 
+                {: 
+                        comprobarOperandoBool(a.toString());
+                        if(operandosBool){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                        ;RESULT = "if ("+a+"){"+b+"break$}"; 
+                :}
+      |ifC aperturaP expresionBool:a cerraduraP aperturaB bloque:b cerraduraB 
+                {:
+                        if(operandosBool || operandosArit=="error"){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                        ;RESULT = "if ("+a+"){"+b+"}"; 
+                :}
+      |ifC aperturaP expresionBool:a cerraduraP aperturaB bloque:b BREAK cerraduraB 
+                {: 
+                        if(operandosBool || operandosArit=="error"){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                        ;RESULT = "if ("+a+"){"+b+"break$}"; 
+                :}
+      |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB 
+      {: 
+                if(operandosBool || operandosArit=="error"){
+                        System.out.println("Error en la condicion");
+                }else{
+                        System.out.println("Condicion correcta");
+                };
+                operandosArit =  "int";
+                operandosBool = false;
+                RESULT = "if ("+a+"){"+b+"}"; 
+      :}
+      |ifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB 
+        {: 
+                if(operandosBool || operandosArit=="error"){
+                        System.out.println("Error en la condicion");
+                }else{
+                        System.out.println("Condicion correcta");
+                };
+                operandosArit =  "int";
+                operandosBool = false;
+                RESULT = "if ("+a+"){"+b+"break$}"; :}
       ;
 
 //Definición de una expresión elif y sus variantes
-elif ::= elifC aperturaP ident:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "elif ("+a+"){"+b+"}"; :}
-      |elifC aperturaP ident:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "elif ("+a+"){"+b+"break$}"; :}
-      |elifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB {: RESULT = "if ("+a+"){"+b+"}"; :}
-      |elifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: RESULT = "elif ("+a+"){"+b+"break$}"; :}
+elif ::= elifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB 
+                {:
+                        comprobarOperandoBool(a.toString());
+                        if(operandosBool){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                        ; RESULT = "elif ("+a+"){"+b+"}"; 
+                :}
+      |elifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b BREAK cerraduraB 
+                {:
+                        comprobarOperandoBool(a.toString());
+                        if(operandosBool){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                        ;RESULT = "elif ("+a+"){"+b+"break$}";
+                :}
+      |elifC aperturaP expresionBool:a cerraduraP aperturaB bloque:b cerraduraB {:
+                        if(operandosBool || operandosArit=="error"){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                        ; RESULT = "elif ("+a+"){"+b+"}"; :}
+      |elifC aperturaP expresionBool:a cerraduraP aperturaB bloque:b BREAK cerraduraB 
+                {:
+                        if(operandosBool || operandosArit=="error"){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                        ;RESULT = "elif ("+a+"){"+b+"break$}"; 
+                :}
+      |elifC aperturaP condicion:a cerraduraP aperturaB bloque:b cerraduraB {: 
+                if(operandosBool || operandosArit=="error"){
+                        System.out.println("Error en la condicion");
+                }else{
+                        System.out.println("Condicion correcta");
+                };
+                operandosArit =  "int";
+                operandosBool = false; RESULT = "if ("+a+"){"+b+"}"; :}
+      |elifC aperturaP condicion:a cerraduraP aperturaB bloque:b BREAK cerraduraB {: 
+                if(operandosBool || operandosArit=="error"){
+                        System.out.println("Error en la condicion");
+                }else{
+                        System.out.println("Condicion correcta");
+                };
+                operandosArit =  "int";
+                operandosBool = false;RESULT = "elif ("+a+"){"+b+"break$}"; :}
       ;
 
 //Definición de una expresión else
@@ -465,47 +1172,54 @@ lista ::= lista:l1 coma lista:l2 {: RESULT = l1+","+l2; :}
 
 //Grupo de valores capaces de ser asignados a un arreglo
 grupoArreglo ::= INTEGER_LITERAL:a {: RESULT = a; :}
-                |FLOAT_LITERAL:a {: RESULT = a; :}
                 |caracter:a {: RESULT = a; :}
+                |funcionAsig:a {: RESULT = a; :}
+                |ident:a {: RESULT = a; :}
                 ;
 
 listaParam ::= listaParam:a coma listaParam:b {: RESULT = a+","+b; :}
                 | lista:n {: RESULT = n; :}
-                | listaIdent:n {: RESULT = n; :}
                 ;
 
-asignacion ::= ident:a equivalente agrupacionVariable:b {: RESULT = a+"="+b; :};
+asignacion ::= ident:a equivalente agrupacionVariable:b {: verificarAsignacion(a.toString(), b.toString()); RESULT = a+"="+b; :}
+                |ident:a equivalente STRING_LITERAL:b {: verificarAsignacion(a.toString(), "@"+b); RESULT = a+"="+b; :}
+                ;
 
 //Declaración de un arreglo con tamaño estático, sin ser inicializado
-arregloSim ::= tipoArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = c+" "+a+" ["+b.toString()+"]"; :};
 
 //Inicialización de un arreglo a una lista de valores
-arregloAsig ::= arregloSim:a equivalente aperturaC lista:b cerraduraC {: RESULT = a+" = ["+b+"]"; :};
+arregloAsig ::= tipoArr:a ident:b aperturaC INTEGER_LITERAL:c cerraduraC equivalente aperturaC lista:d cerraduraC {: validarArreglo(a.toString(),b.toString(),c.toString(),d.toString()); RESULT = a+" "+b+" ["+c.toString()+"]"+" = ["+d+"]"; :}
+                |tipoArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: comprobarVariable(c.toString(), a.toString(), false); RESULT = c+" "+a+" ["+b.toString()+"]"; :}
+                ;
 
 //Asignación de un indice del arreglo a un valor
 arregloInd ::= ident:a aperturaC INTEGER_LITERAL:b cerraduraC equivalente grupoArreglo:c {: RESULT = a+" = ["+b.toString()+"] = " + c; :};
 
 //Definición del return
-returnD ::= returnC ident:a finalExpre{: RESULT = "return " + a + "$"; :}
-            | returnC INTEGER_LITERAL:a finalExpre{: RESULT = "return " + a.toString()+ "$"; :}
-            | returnC FLOAT_LITERAL:a finalExpre{: RESULT = "return " + a.toString()+ "$"; :}
+returnD ::= returnC ident:a finalExpre{: retornoActual=a.toString(); RESULT = "return " + a + "$"; :}
+            | returnC INTEGER_LITERAL:a finalExpre{: retornoActual=a.toString(); RESULT = "return " + a.toString()+ "$"; :}
+            | returnC FLOAT_LITERAL:a finalExpre{: retornoActual=a.toString(); RESULT = "return " + a.toString()+ "$"; :}
             ;
 
+valorIndizado ::= ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: RESULT = a+" = ["+b.toString()+"]"; :};
+
+
 //Definición de la función print
-print ::= printC aperturaP STRING_LITERAL:a cerraduraP {: RESULT = "print("+a+")"; :};
+print ::= printC aperturaP STRING_LITERAL:a cerraduraP 
+                {: 
+                        RESULT = "print("+a+")"; 
+                        print_mips(a.toString());
+                :};
+
 
 //Definición de la función input
 input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
 
 //Definición de uno o más parametros tipados y separados por coma 
-param ::= param:a coma param:b {: RESULT = a+","+b; :}
-         |tipoVar:a ident:b {: RESULT = a+" "+b; :}
+param ::= param:a coma param:b {: RESULT = a+","+b; System.out.println("XDXDDDD"); :}
+         |tipoVar:a ident:b {: comprobarVariable(a.toString(), b.toString(), true); RESULT = a+" "+b; System.out.println("XDXD"); :}
+         |tipoArr:a ident:b {: comprobarVariable(a.toString(), b.toString(), true); RESULT = a+" "+b; System.out.println("XDXDD"); :}
         ;
-
-//Definición de una lista de identificadores
-listaIdent ::= listaIdent:a coma listaIdent:b {: RESULT = a+","+b; :}
-                |ident:a                      {: RESULT = a; :}
-                ;
 
 //Definición de una función capaz de ser asignada, ejemplo: "miFuncion()"
 funcionAsig ::= ident:a aperturaP listaParam:b cerraduraP {: RESULT = a+"("+b+")"; :}
@@ -515,19 +1229,88 @@ funcionAsig ::= ident:a aperturaP listaParam:b cerraduraP {: RESULT = a+"("+b+")
 //Definición de la parte inicial de una variable, compuesta de un tipo y un identificador
 variable ::= tipoVar:a ident:b 
                 {: 
-                        comprobarVariable(a.toString(), b.toString());
+                        comprobarVariable(a.toString(), b.toString(), false);
+                        RESULT = a + " " + b;
                 :}
-                |tipoVar:a ident:b equivalente agrupacionVariable:a {: System.out.println("PARSER: sentencia: " + a + "\n"); :};
+                |
+                tipoArr:a ident:b 
+                {: 
+                        comprobarVariable(a.toString(), b.toString(), false);
+                        RESULT = a + " " + b;
+                :}
+                |tipoArr:a ident:b equivalente agrupacionVariable:c 
+                {: 
+                        if(esOperacion(c)){
+                                System.out.println("Es una operacion");
+                                if(operandosArit.equals("error")){
+                                        System.out.println("La operacion: " +c+" es invalida");
+                                }else if(operandosArit.equals("int")){
+                                        verificarInicializacion(b.toString(), a.toString(), "1"); 
+                                }else{
+                                        verificarInicializacion(b.toString(), a.toString(), "1.1"); 
+                                }
+                                operandosArit = "int";
+                        }else if(esOperacionBool(c)){
+                                System.out.println("Es una operacion booleana");
+                                if(operandosBool){
+                                        System.out.println("La operacion: " +c+" es invalida");
+                                }else{
+                                        verificarInicializacion(b.toString(), a.toString(), "true"); 
+                                }
+                                operandosBool = false;
+                                operandosArit = "int";
+                        }else{
+                                verificarInicializacion(b.toString(), a.toString(), c.toString()); 
+                                System.out.println("PARSER: sentencia: " + a + "\n");
+                        }
+                        RESULT = a + " " + b + " = " + c;
+                :}
+                |tipoVar:a ident:b equivalente agrupacionVariable:c 
+                {: 
+                        if(esOperacion(c)){
+                                System.out.println("Es una operacion");
+                                if(operandosArit.equals("error")){
+                                        System.out.println("La operacion: " +c+" es invalida");
+                                }else if(operandosArit.equals("int")){
+                                        verificarInicializacion(b.toString(), a.toString(), "1"); 
+                                }else{
+                                        verificarInicializacion(b.toString(), a.toString(), "1.1"); 
+                                }
+                                operandosArit = "int";
+
+                        }else if(esOperacionBool(c)){
+                                System.out.println("Es una operacion booleana");
+                                if(operandosBool){
+                                        System.out.println("La operacion: " +c+" es invalida");
+                                }else{
+                                        verificarInicializacion(b.toString(), a.toString(), "true"); 
+                                }
+                                operandosBool = false;
+                                operandosArit = "int";
+                        }else{
+                                verificarInicializacion(b.toString(), a.toString(), c.toString()); System.out.println("PARSER: sentencia: " + a + "\n");
+                        }
+                        RESULT = a + " " + b + " = " + c;
+                :}
+                |tipoArr:a ident:b equivalente STRING_LITERAL:c 
+                {: 
+                        verificarInicializacion(b.toString(), a.toString(), "@"+c); 
+                        System.out.println("PARSER: sentencia: " + a + "\n");
+                        RESULT = a + " " + b + " = " + c;
+                :}
+                |tipoVar:a ident:b equivalente STRING_LITERAL:c 
+                {: 
+                        verificarInicializacion(b.toString(), a.toString(), "@"+c); System.out.println("PARSER: sentencia: " + a + "\n");
+                        RESULT = a + " " + b + " = " + c;
+                :}
             ;
 
 //Agrupación de expresiones capaces de ser declaradas dentro de un bloque especializado o función
 declaracion ::= variable:a finalExpre {: RESULT = a+"$"; :}
-                |variableAsig:a finalExpre {: RESULT = a+"$"; :}
                 |asignacion:a finalExpre {: RESULT = a+"$"; :}
                 |operacionNum:a finalExpre {: RESULT = a+"$"; :}
                 |funcionAsig:a finalExpre {: RESULT = a+"$"; :}
                 |operacionRacNum:a finalExpre {: RESULT = a+"$"; :}
-                |arregloSim:a finalExpre {: RESULT = a+"$"; :}
                 |arregloAsig:a finalExpre {: RESULT = a+"$"; :}
                 |arregloInd:a finalExpre {: RESULT = a+"$"; :}
                 |input:a finalExpre {: RESULT = a+"$"; :}
@@ -535,10 +1318,80 @@ declaracion ::= variable:a finalExpre {: RESULT = a+"$"; :}
                 ;
 
 //Definición de una expresión for
-forD ::= forC aperturaP variableAsig:a inC ident:b operacionSumaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
-        |forC aperturaP ident:a inC ident:b operacionSumaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
-        |forC aperturaP variableAsig:a inC ident:b operacionRestaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
-        |forC aperturaP ident:a inC ident:b operacionRestaUna:c cerraduraP {: RESULT = "for("+a+" in "+b+c+")"; :}
+forD ::= forC aperturaP variable:a finalExpre operandoBool:b finalExpre operacionSumaUna:c cerraduraP 
+        {:      
+                if(esOperacionBool(b)){
+                        if(operandosBool){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                };
+                 RESULT = "for("+a+";"+b+";"+c+")";
+         :}
+        |forC aperturaP variable:a finalExpre expresionBool:b finalExpre operacionSumaUna:c cerraduraP 
+        {:      
+                if(esOperacionBool(b)){
+                        if(operandosBool){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                };
+                 RESULT = "for("+a+";"+b+";"+c+")";
+         :}
+        |forC aperturaP variable:a finalExpre condicion:b finalExpre operacionSumaUna:c cerraduraP 
+        {: 
+                if(operandosBool){
+                        System.out.println("Error en la condicion");
+                }else{
+                        System.out.println("Condicion correcta");
+                };
+                operandosArit =  "int";
+                operandosBool = false;
+                RESULT = "for("+a+";"+b+";"+c+")";
+        :}
+        |forC aperturaP variable:a finalExpre operandoBool:b  finalExpre operacionRestaUna:c cerraduraP 
+        {: 
+                if(esOperacionBool(b)){
+                        if(operandosBool){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                };
+                RESULT = "for("+a+";"+b+";"+c+")"; 
+        :}
+        |forC aperturaP variable:a finalExpre expresionBool:b  finalExpre operacionRestaUna:c cerraduraP 
+        {: 
+                if(esOperacionBool(b)){
+                        if(operandosBool){
+                                System.out.println("Error en la condicion");
+                        }else{
+                                System.out.println("Condicion correcta");
+                        }
+                        operandosArit =  "int";
+                        operandosBool = false;
+                };
+                RESULT = "for("+a+";"+b+";"+c+")"; 
+        :}
+        |forC aperturaP variable:a finalExpre condicion:b finalExpre operacionRestaUna:c cerraduraP 
+        {: 
+                if(operandosBool){
+                        System.out.println("Error en la condicion");
+                }else{
+                        System.out.println("Condicion correcta");
+                };
+                operandosArit =  "int";
+                operandosBool = false;
+                RESULT = "for("+a+";"+b+";"+c+")"; 
+        :}
         ;
 
 
@@ -565,7 +1418,19 @@ doD ::= doC aperturaB bloque:a cerraduraB {: RESULT = "do{"+a+"}"; :}
         ;
 
 //Definición de expresión while
-whileD ::= whileC aperturaP condicion:a cerraduraP {: RESULT = "while("+a+")"; :};
+whileD ::= whileC aperturaP condicion:a cerraduraP 
+        {: 
+                if(operandosBool){
+                        System.out.println("Error en la condicion");
+                }else{
+                        System.out.println("Condicion correcta");
+                };
+                operandosArit =  "int";
+                operandosBool = false;
+                RESULT = "while("+a+")"; 
+        :}
+        | whileC aperturaP operandoBool:a cerraduraP 
+        | whileC aperturaP expresionBool:a cerraduraP ;
 
 //Definición de bloque do-While
 bloqueDoWhile ::= doD:a whileD:b {: RESULT = a+""+b; :};
@@ -575,10 +1440,10 @@ bloqueDoWhile ::= doD:a whileD:b {: RESULT = a+""+b; :};
 //Grupo de expresiones capaces de ser asignadas a una variable
 agrupacionVariable ::= funcionAsig:a  {: RESULT = a; :}
                        | caracter:a  {: RESULT = a.toString(); :}
-                       | STRING_LITERAL:a  {: RESULT = a; :}
                        | ident:a {: RESULT = a; :}
                        | variableNum:a {: RESULT = a; :}
                        | variableBool:a {: RESULT = a; :}
+                       | valorIndizado:a {: RESULT = a; :}
                        ;
 
 //Comentario de linea
@@ -589,8 +1454,8 @@ comentarioBloque ::= comentApert ident:a comentCerrad {: RESULT = "/_ "+a+"_/"; 
 
 //Agrupación de tipos posibles para variables y arreglos
 tipoVar ::= STRING {: RESULT = "string"; :}
-        |tipoArr:a {: RESULT = a :}
         |FLOAT {: RESULT = "float"; :}
+        |BOOLEAN {: RESULT = "bool"; :}
         ;
 
 tipoArr ::= INT {: RESULT = "int"; :}
@@ -604,7 +1469,7 @@ tipoNum ::=  INT {: RESULT = "int"; :}
 
 //Agrupación de tipos para una función    
 tipoFuncion ::=  tipoNum:a {: RESULT = a; :}
-                |BOOLEAN {: RESULT = "boolean"; :}
+                |BOOLEAN {: RESULT = "bool"; :}
                 ;
 
 //Agrupación de operadores aritmétricos

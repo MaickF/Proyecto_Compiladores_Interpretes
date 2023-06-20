@@ -28,6 +28,93 @@ action code{:
         StringBuffer cod_mips_text = new StringBuffer();
         int currentVar = 0;
 
+        public void if_mips(String condition) {
+                StringBuilder mipsCode = new StringBuilder();
+                int currentSerial = ifSerial++;
+                String ifLabel = "if_" + currentSerial;
+                String trueLabel = "if_true_" + currentSerial;
+                String falseLabel = "if_false_" + currentSerial;
+                String endLabel = "if_end_" + currentSerial;
+                mipsCode.append("# Evaluación de la condición del if").append("\n");
+                mipsCode.append("    ").append(generateMIPSCondition(condition, trueLabel, falseLabel)).append("\n");
+                mipsCode.append(ifLabel).append(":").append("\n");
+                mipsCode.append("# Código MIPS para la rama verdadera del if").append("\n");
+                mipsCode.append(trueLabel).append(":").append("\n");
+                mipsCode.append("    # Resto del código de la rama verdadera").append("\n");
+                mipsCode.append("    j ").append(endLabel).append("\n");
+                mipsCode.append("# Código MIPS para el final del if").append("\n");
+                mipsCode.append(falseLabel).append(":").append("\n");
+                mipsCode.append("    # Resto del código de la rama falsa").append("\n");
+                mipsCode.append(endLabel).append(":").append("\n");
+        }
+
+        public static String buildWhileExpression(String condition) {
+        StringBuilder mipsCode = new StringBuilder();
+
+        // Generar el serial para el bucle "while" actual
+        int currentSerial = whileSerial++;
+
+        // Etiquetas para el bucle "while"
+        String whileLabel = "while_" + currentSerial;
+        String endLabel = "end_" + currentSerial;
+
+        // Código MIPS para evaluar la condición
+        mipsCode.append("# Evaluación de la condición del while").append("\n");
+        mipsCode.append(whileLabel).append(":").append("\n");
+        mipsCode.append("    ").append(generateMIPSCondition(condition, endLabel)).append("\n");
+
+        // Código MIPS para el cuerpo del bucle "while"
+        mipsCode.append("# Código MIPS para el cuerpo del while").append("\n");
+        mipsCode.append("    # Resto del código dentro del while").append("\n");
+
+        // Salto al inicio del bucle "while" si la condición se cumple
+        mipsCode.append("    j ").append(whileLabel).append("\n");
+
+        // Etiqueta del final del bucle "while"
+        mipsCode.append(endLabel).append(":").append("\n");
+
+        return mipsCode.toString();
+    }
+
+    public static String buildForLoop(int lowerLimit, int upperLimit) {
+        StringBuilder mipsCode = new StringBuilder();
+
+        // Generar el serial para el bucle "for" actual
+        int currentSerial = forSerial++;
+
+        // Etiquetas para el bucle "for"
+        String forLabel = "for_" + currentSerial;
+        String endLabel = "end_" + currentSerial;
+
+        // Código MIPS para inicializar el contador
+        mipsCode.append("# Inicialización del contador del bucle for").append("\n");
+        mipsCode.append("    li $t0, ").append(lowerLimit).append("\n");
+
+        // Etiqueta del inicio del bucle "for"
+        mipsCode.append(forLabel).append(":").append("\n");
+
+        // Código MIPS para evaluar la condición del bucle
+        mipsCode.append("# Evaluación de la condición del bucle for").append("\n");
+        mipsCode.append("    slti $t1, $t0, ").append(upperLimit).append("\n");
+        mipsCode.append("    beq $t1, $zero, ").append(endLabel).append("\n");
+
+        // Código MIPS para el cuerpo del bucle "for"
+        mipsCode.append("# Código MIPS para el cuerpo del bucle for").append("\n");
+        mipsCode.append("    # Resto del código dentro del bucle for").append("\n");
+
+        // Código MIPS para incrementar el contador
+        mipsCode.append("# Incremento del contador del bucle for").append("\n");
+        mipsCode.append("    addi $t0, $t0, 1").append("\n");
+
+        // Salto al inicio del bucle "for"
+        mipsCode.append("    j ").append(forLabel).append("\n");
+
+        // Etiqueta del final del bucle "for"
+        mipsCode.append(endLabel).append(":").append("\n");
+
+        return mipsCode.toString();
+    }
+
         public void print_mips(String print_string){
                 System.out.println("Entro al print");
                 String string_var_name = "var" + currentVar;
@@ -36,6 +123,61 @@ action code{:
                 cod_mips_text.append("li $v0, 4\n");
                 cod_mips_text.append("la $a0, " + string_var_name + "\n");
                 cod_mips_text.append("syscall\n");
+        }
+
+        public void function_mips(String nombre, String parametros){
+                String etiqueta = nombre + ":\n";
+                cod_mips_text.append(etiqueta);
+                 String[] listaParametros = parametros.split(",");
+                if(!parametros.equals("")){
+                        for (String parametro : listaParametros) {
+                                String ajusteParam = parametro.trim();
+
+                                String[] divisionParam = ajusteParam.split(" ");
+
+                                String tipo = divisionParam[0];
+                                String nombreParam = divisionParam[1];
+
+                                generateMIPSParameter(tipo, nombreParam);
+                        }
+                }
+                
+        }
+
+        public void generateMIPSParameter(String tipo, String nombre) {
+                // Agregar el código MIPS para declarar el parámetro en el segmento de datos
+                cod_mips_data.append(nombre).append(": .").append(tipoParamMips(tipo));
+                cod_mips_data.append(" ").append(valorInicial(tipo)).append("\n");
+        }
+
+        public String tipoParamMips(String tipo) {
+                if (tipo.equals("int")) {
+                        return "word";
+                } else if (tipo.equals("String")) {
+                        return "asciiz";
+                } else if (tipo.equals("char")) {
+                        return "byte";
+                } else if (tipo.equals("float")) {
+                        return "float";
+                } else {
+        // Tipo de dato desconocido, retorna una directiva vacía
+                        return "";
+                }
+        }
+
+        public String valorInicial(String tipo) {
+                if (tipo.equals("int")) {
+                        return "0";
+                } else if (tipo.equals("String")) {
+                        return "\"\"";
+                } else if (tipo.equals("char")) {
+                        return "'\0'";
+                } else if (tipo.equals("float")) {
+                        return "0.0";
+                } else {
+                        // Tipo de dato desconocido, retorna un valor vacío
+                        return "";
+                }
         }
 
         public void print_cod_mips(){
@@ -47,16 +189,6 @@ action code{:
                 
         }
 
-        public void print_symbols_table(){
-                for (String key: symbols_table.keySet()) {
-                        System.out.println("Tabla de simbolos: \n" + key);
-                        System.out.println("Valores: ");
-                        for (String item: symbols_table.get(key)) {
-                                System.out.println(item);
-                        }
-                        System.out.println("");
-                }
-        }
 
         public void print_symbols_table(){
                 for (int i = errores.size()-1; i>0; i--) {
@@ -341,18 +473,23 @@ action code{:
 
         public void comprobarFuncion(String tipo, String nombre, String param){
                 String tipoValorRetorno = verificarTipoVariable(retornoActual);
+                System.out.println(nombre);
+                System.out.println(tipoValorRetorno);
+                System.out.println(tipo);
                 if(tipoValorRetorno.equals("identifier")){
                         String existeValorRetorno=obtenerTipoVariable(retornoActual.toString());
                         if(existeValorRetorno.equals(tipo)){
                                 existeFuncion(nombre, tipo, param);
                         }else{
                                 errores.add("Retorno invalido");
+                                error=true;
                         }
                 }else{
                         if(tipoValorRetorno.equals(tipo)){
                                         existeFuncion(nombre, tipo, param);
                         }else{
                                 errores.add("Retorno invalido");
+                                error=true;
                         }
                 }
                 
@@ -684,9 +821,15 @@ iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloq
                                 error = false;
                         }else{
                                 comprobarFuncion(a.toString(), b.toString(), c.toString()); 
-                                RESULT = a+" " + b+"("+c+") {"+d+e+"}";
-                                variables = new ArrayList<String>();
-                                retornoActual = "";
+                                if(error){
+                                       System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
+                                        error = false; 
+                                }else{
+                                        RESULT = a+" " + b+"("+c+") {"+d+e+"}";
+                                        variables = new ArrayList<String>();
+                                        retornoActual = "";
+                                        function_mips(b.toString(), c.toString());
+                                }
                         }
                 :}
                 |tipoFuncion:a ident:b aperturaP cerraduraP aperturaB bloque:c returnD:d cerraduraB 
@@ -695,9 +838,16 @@ iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloq
                                 System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
                                 error = false;
                         }else{
-                                comprobarFuncion(a.toString(), b.toString(), ""); RESULT = a+" " + b+"() {"+c+d+"}"; 
-                                variables = new ArrayList<String>();
-                                retornoActual = "";
+                                comprobarFuncion(a.toString(), b.toString(), "");
+                                if(error){
+                                     System.out.println("La funcion: " + b + "no ha podido crearse debido a errores");
+                                        error = false;   
+                                }else{
+                                        RESULT = a+" " + b+"() {"+c+d+"}"; 
+                                        variables = new ArrayList<String>();
+                                        retornoActual = "";
+                                        function_mips(b.toString(), c.toString());
+                                }
                         }
                 :}
                 ;
@@ -708,7 +858,7 @@ funciones ::= funciones iniFuncion:a {: System.out.println("/_Fin de tabla de si
                 ;
 
 //Definición de la función main
-main ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: comprobarFuncion(a.toString(), "main", ""); RESULT = a+" main() {"+b+c+"}"; :};
+main ::= tipoFuncion:a mainC aperturaP cerraduraP aperturaB bloque:b returnD:c cerraduraB {: comprobarFuncion(a.toString(), "main", ""); RESULT = a+" main() {"+b+c+"}"; function_mips("main", ""); :};
 
 //Agrupación de múltiples funciones, entre las que debe estar la función main
 inicio ::= funciones main
@@ -718,7 +868,7 @@ inicio ::= funciones main
                 ;
 
 //Símbolo inicial del programa
-ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); :};
+ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); print_cod_mips();:};
 
 //Operando numérico que posteriormente podrá ser utilizado para operaciones númericas y racionales
 operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString();:}
