@@ -26,91 +26,115 @@ action code{:
 
         StringBuffer cod_mips_data = new StringBuffer();
         StringBuffer cod_mips_text = new StringBuffer();
+        StringBuffer cod_mips_data_temp = new StringBuffer();
+        StringBuffer cod_mips_text_temp = new StringBuffer();
         int currentVar = 0;
+        int ifSerial = 0;
+        int whileSerial = 0;
+        int forSerial = 0;
 
-        public void if_mips(String condition) {
+        public void if_mips(String condicion) {
                 StringBuilder mipsCode = new StringBuilder();
                 int currentSerial = ifSerial++;
                 String ifLabel = "if_" + currentSerial;
-                String trueLabel = "if_true_" + currentSerial;
-                String falseLabel = "if_false_" + currentSerial;
                 String endLabel = "if_end_" + currentSerial;
-                mipsCode.append("# Evaluación de la condición del if").append("\n");
-                mipsCode.append("    ").append(generateMIPSCondition(condition, trueLabel, falseLabel)).append("\n");
-                mipsCode.append(ifLabel).append(":").append("\n");
-                mipsCode.append("# Código MIPS para la rama verdadera del if").append("\n");
-                mipsCode.append(trueLabel).append(":").append("\n");
-                mipsCode.append("    # Resto del código de la rama verdadera").append("\n");
-                mipsCode.append("    j ").append(endLabel).append("\n");
-                mipsCode.append("# Código MIPS para el final del if").append("\n");
-                mipsCode.append(falseLabel).append(":").append("\n");
-                mipsCode.append("    # Resto del código de la rama falsa").append("\n");
-                mipsCode.append(endLabel).append(":").append("\n");
+                cod_mips_text_temp.insert(0, ifLabel+":\n");
+                cod_mips_text_temp.insert(0, generarCondicionMips(condicion, ifLabel, endLabel));
+                cod_mips_text_temp.append(endLabel).append(":").append("\n");
         }
 
-        public static String buildWhileExpression(String condition) {
+        public String generarCondicionMips(String condicion, String saltoTrue, String saltoFalse){
+                return "condicion\n";
+        }
+
+        public void arregloMips(String nombreArreglo, String lista) {
+                String elementos[]=lista.split(",");
+
+                // Segmento de datos
+                // Generar declaración de arreglo en MIPS
+                cod_mips_data_temp.append(nombreArreglo).append(": .word ");
+
+                // Generar los elementos del arreglo
+                for (int i = 0; i < elementos.length; i++) {
+                        cod_mips_data_temp.append(elementos[i]);
+                        if (i < elementos.length - 1) {
+                                cod_mips_data_temp.append(", ");
+                        }
+                }
+
+                cod_mips_data_temp.append("\n");
+        }
+
+        public void readMips(String variable) {
+                // Segmento de texto
+                cod_mips_text_temp.append("li $v0, 5\n"); // Cargar el código de la llamada al sistema para leer un entero
+                cod_mips_text_temp.append("syscall\n"); 
+                 cod_mips_text_temp.append("sw $v0, ").append(variable).append("\n"); // Almacenar el valor leído en la variable
+        }
+
+
+        public void variable_mips(String tipo, String nombre, String valor){
+                if (tipo.equals("string")) {
+                        if (valor.equals("")) {
+                                cod_mips_data_temp.append(nombre).append(": .asciiz \"\"\n");
+                        } else {
+                                cod_mips_data_temp.append(nombre).append(": .asciiz \"").append(valor).append("\"\n");
+                        }
+                } else if (tipo.equals("float")) {
+                        if (valor.equals("")) {
+                                cod_mips_data_temp.append(nombre).append(": .float 0.0\n");
+                        } else {
+                                cod_mips_data_temp.append(nombre).append(": .float ").append(valor).append("\n");
+                        }
+                } else if (tipo.equals("int")) {
+                        if (valor.equals("")) {
+                                cod_mips_data_temp.append(nombre).append(": .word 0\n");
+                        } else {
+                                cod_mips_data_temp.append(nombre).append(": .word ").append(valor).append("\n");
+                        }
+                } else if (tipo.equals("char")) {
+                        if (valor.equals("")) {
+                                cod_mips_data_temp.append(nombre).append(": .byte 0\n");
+                        } else {
+                                cod_mips_data_temp.append(nombre).append(": .byte '").append(valor.charAt(0)).append("'\n");
+                        }
+                }
+        }
+
+        public void doWhileMips(String condition) {
         StringBuilder mipsCode = new StringBuilder();
 
-        // Generar el serial para el bucle "while" actual
         int currentSerial = whileSerial++;
 
-        // Etiquetas para el bucle "while"
-        String whileLabel = "while_" + currentSerial;
-        String endLabel = "end_" + currentSerial;
+        String whileLabel = "do_" + currentSerial;
+        String endLabel = "end_while_" + currentSerial;
 
-        // Código MIPS para evaluar la condición
-        mipsCode.append("# Evaluación de la condición del while").append("\n");
-        mipsCode.append(whileLabel).append(":").append("\n");
-        mipsCode.append("    ").append(generateMIPSCondition(condition, endLabel)).append("\n");
-
-        // Código MIPS para el cuerpo del bucle "while"
-        mipsCode.append("# Código MIPS para el cuerpo del while").append("\n");
-        mipsCode.append("    # Resto del código dentro del while").append("\n");
-
-        // Salto al inicio del bucle "while" si la condición se cumple
-        mipsCode.append("    j ").append(whileLabel).append("\n");
-
-        // Etiqueta del final del bucle "while"
-        mipsCode.append(endLabel).append(":").append("\n");
-
-        return mipsCode.toString();
+        cod_mips_text_temp.insert(0, whileLabel+":\n");
+        cod_mips_text_temp.append(generarCondicionMips(condition, whileLabel, endLabel)).append("\n");
+        cod_mips_text_temp.append("j ").append(whileLabel).append("\n");
+        cod_mips_text_temp.append(endLabel).append(":").append("\n");
     }
 
-    public static String buildForLoop(int lowerLimit, int upperLimit) {
+    public String buildForLoop(int inicio, int finalE) {
         StringBuilder mipsCode = new StringBuilder();
 
-        // Generar el serial para el bucle "for" actual
         int currentSerial = forSerial++;
 
-        // Etiquetas para el bucle "for"
         String forLabel = "for_" + currentSerial;
         String endLabel = "end_" + currentSerial;
 
-        // Código MIPS para inicializar el contador
-        mipsCode.append("# Inicialización del contador del bucle for").append("\n");
-        mipsCode.append("    li $t0, ").append(lowerLimit).append("\n");
+        cod_mips_text_temp.append("li $t0, ").append(inicio).append("\n");
 
-        // Etiqueta del inicio del bucle "for"
-        mipsCode.append(forLabel).append(":").append("\n");
+        cod_mips_text_temp.append(forLabel).append(":").append("\n");
 
-        // Código MIPS para evaluar la condición del bucle
-        mipsCode.append("# Evaluación de la condición del bucle for").append("\n");
-        mipsCode.append("    slti $t1, $t0, ").append(upperLimit).append("\n");
-        mipsCode.append("    beq $t1, $zero, ").append(endLabel).append("\n");
+        cod_mips_text_temp.append("slti $t1, $t0, ").append(finalE).append("\n");
+        cod_mips_text_temp.insert(0, "beq $t1, $zero, ").append(endLabel).append("\n");
 
-        // Código MIPS para el cuerpo del bucle "for"
-        mipsCode.append("# Código MIPS para el cuerpo del bucle for").append("\n");
-        mipsCode.append("    # Resto del código dentro del bucle for").append("\n");
+        cod_mips_text_temp.append("    addi $t0, $t0, 1").append("\n");
 
-        // Código MIPS para incrementar el contador
-        mipsCode.append("# Incremento del contador del bucle for").append("\n");
-        mipsCode.append("    addi $t0, $t0, 1").append("\n");
+        cod_mips_text_temp.append("j").append(forLabel).append("\n");
 
-        // Salto al inicio del bucle "for"
-        mipsCode.append("    j ").append(forLabel).append("\n");
-
-        // Etiqueta del final del bucle "for"
-        mipsCode.append(endLabel).append(":").append("\n");
+        cod_mips_text_temp.append(endLabel).append(":").append("\n");
 
         return mipsCode.toString();
     }
@@ -119,15 +143,15 @@ action code{:
                 System.out.println("Entro al print");
                 String string_var_name = "var" + currentVar;
                 currentVar++;
-                cod_mips_data.append(string_var_name + ": .asciiz \"" + print_string + "\\n\"\n");
-                cod_mips_text.append("li $v0, 4\n");
-                cod_mips_text.append("la $a0, " + string_var_name + "\n");
-                cod_mips_text.append("syscall\n");
+                cod_mips_data_temp.append(string_var_name + ": .asciiz \"" + print_string + "\\n\"\n");
+                cod_mips_text_temp.append("li $v0, 4\n");
+                cod_mips_text_temp.append("la $a0, " + string_var_name + "\n");
+                cod_mips_text_temp.append("syscall\n");
         }
 
         public void function_mips(String nombre, String parametros){
                 String etiqueta = nombre + ":\n";
-                cod_mips_text.append(etiqueta);
+                cod_mips_text_temp.insert(0, etiqueta);
                  String[] listaParametros = parametros.split(",");
                 if(!parametros.equals("")){
                         for (String parametro : listaParametros) {
@@ -141,7 +165,10 @@ action code{:
                                 generateMIPSParameter(tipo, nombreParam);
                         }
                 }
-                
+                cod_mips_data.append(cod_mips_data_temp);
+                cod_mips_text.append(cod_mips_text_temp);
+                cod_mips_data_temp = new StringBuffer();
+                cod_mips_text_temp = new StringBuffer();
         }
 
         public void generateMIPSParameter(String tipo, String nombre) {
@@ -361,7 +388,7 @@ action code{:
                 return resultado;
         }
 
-        public void validarArreglo(String tipo, String nombre, String tamanho, String lista){
+        public boolean validarArreglo(String tipo, String nombre, String tamanho, String lista){
                 System.out.println("validando arreglo: "+nombre);
                 ArrayList<String> listaConvert = obtenerLista(lista);
                 System.out.println(listaConvert);
@@ -373,8 +400,10 @@ action code{:
                 if(tamanhoValid && tipoValid){
                         String variableNueva = nombre + ":" + tipo;
                         variables.add(variableNueva);
+                        return true;
                 }else{
                         errores.add("El arreglo no esta declarado correctamente");
+                        return false;
                 }
         }
 
@@ -450,23 +479,27 @@ action code{:
                 }
         }
 
-        public void comprobarVariable(String tipo, String nombre, boolean param){
+        public boolean comprobarVariable(String tipo, String nombre, boolean param){
                 String existencia = obtenerTipoVariable(nombre);
                 if(existencia.equals("")){
                         System.out.println("PARSER: identificardor: " + tipo);
                         if(param){
                                 String nuevo = "parametro:" + nombre + ":" + tipo;
                                 variables.add(nuevo);
+                                return true;
                         }else{
                                 String nuevo = nombre + ":" + tipo;
                                 variables.add(nuevo);
+                                return true;
                         }
                 }else{
                         if(param){
                                 error = true;
                                 errores.add("Parametro:" + nombre + "repetido, por favor solucione el error para crear la funcion");
+                                return false;
                         }else{
-                                errores.add("La variable:" + nombre + "ya existe en esta función");                                
+                                errores.add("La variable:" + nombre + "ya existe en esta función");     
+                                return false;                           
                         }
                 }
         }
@@ -641,38 +674,46 @@ action code{:
                 }
         }
 
-        public void verificarInicializacion(String nombre, String tipo, String valor){
+        public boolean verificarInicializacion(String nombre, String tipo, String valor){
                 System.out.println("Entro a verificar inicializacion");
                 System.out.println("El valor a evaluar es: "+valor);
                 System.out.println("\n");
                 boolean existencia = existeVariable(nombre, tipo);
                 if(existencia){
                         errores.add("La variable: "+ nombre + "ya existe");
+                        return false;
                 }else{
                         String tipo2 = verificarTipoVariable(valor);
                         if(tipo.equals(tipo2)){
                                 System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                                 variables.add(nombre+":"+tipo);
+                                return true;
                         }else if(tipo2.equals("identifier")){
                                 String existencia2 = obtenerTipoVariable(valor.toString());
                                 if(tipo.equals(existencia2) && !(nombre.equals(valor.toString()))){
                                         System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                                         variables.add(nombre+":"+tipo);
+                                        return true;
                                 }else{
                                         errores.add("La variable:" + existencia2 +"no coincide con el valor de: "+tipo);
+                                        return false;
                                 }
                         }else if(tipo2.equals("function")){
                                 String tipoFuncion = parametrosFuncionAsig(valor);
                                 if(tipoFuncion.equals("error")){
                                         errores.add("La variable:" + nombre +"no coincide con el valor de: "+tipo);
+                                        return false;
                                 }else if(tipoFuncion.equals(tipo)){
                                         System.out.println("Se ha asignado el valor: "+ valor+" a la variable: "+ nombre);
                                         variables.add(nombre+":"+tipo);
+                                        return true;
                                 }else{
                                         errores.add("La variable:" + tipoFuncion +"no coincide con el valor de: "+tipo);
+                                        return false;
                                 }
                         }else{
                                 errores.add("La variable:" + tipo2 +"no coincidaaaa con el valor de: "+tipo);
+                                return false;
                         }
                 }
         }
@@ -729,7 +770,7 @@ action code{:
     public static boolean esOperacionBool(Object obj) {
         if (obj instanceof String) {
             String expresion = (String) obj;
-            String[] operadores = {"<", ">", "<=", "=>", "==", "#", "~", "!="};
+            String[] operadores = {"<", ">", "<=", "=>", "==", "#", "^", "!="};
             
             for (String operador : operadores) {
                 if (expresion.contains(operador)) {
@@ -828,6 +869,7 @@ iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloq
                                         RESULT = a+" " + b+"("+c+") {"+d+e+"}";
                                         variables = new ArrayList<String>();
                                         retornoActual = "";
+
                                         function_mips(b.toString(), c.toString());
                                 }
                         }
@@ -846,6 +888,7 @@ iniFuncion ::= tipoFuncion:a ident:b aperturaP param:c cerraduraP aperturaB bloq
                                         RESULT = a+" " + b+"() {"+c+d+"}"; 
                                         variables = new ArrayList<String>();
                                         retornoActual = "";
+                                        
                                         function_mips(b.toString(), c.toString());
                                 }
                         }
@@ -1024,6 +1067,7 @@ ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                                 System.out.println("Error en la condicion");
                         }else{
                                 System.out.println("Condicion correcta");
+                                if_mips(a.toString());
                         }
                         operandosArit =  "int";
                         operandosBool = false;
@@ -1036,6 +1080,7 @@ ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                                 System.out.println("Error en la condicion");
                         }else{
                                 System.out.println("Condicion correcta");
+                                if_mips(a.toString());
                         }
                         operandosArit =  "int";
                         operandosBool = false;
@@ -1047,6 +1092,7 @@ ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                                 System.out.println("Error en la condicion");
                         }else{
                                 System.out.println("Condicion correcta");
+                                if_mips(a.toString());
                         }
                         operandosArit =  "int";
                         operandosBool = false;
@@ -1058,6 +1104,7 @@ ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                                 System.out.println("Error en la condicion");
                         }else{
                                 System.out.println("Condicion correcta");
+                                if_mips(a.toString());
                         }
                         operandosArit =  "int";
                         operandosBool = false;
@@ -1069,6 +1116,7 @@ ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                         System.out.println("Error en la condicion");
                 }else{
                         System.out.println("Condicion correcta");
+                        if_mips(a.toString());
                 };
                 operandosArit =  "int";
                 operandosBool = false;
@@ -1080,6 +1128,7 @@ ifD ::= ifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                         System.out.println("Error en la condicion");
                 }else{
                         System.out.println("Condicion correcta");
+                        if_mips(a.toString());
                 };
                 operandosArit =  "int";
                 operandosBool = false;
@@ -1094,6 +1143,7 @@ elif ::= elifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                                 System.out.println("Error en la condicion");
                         }else{
                                 System.out.println("Condicion correcta");
+                                if_mips(a.toString());
                         }
                         operandosArit =  "int";
                         operandosBool = false;
@@ -1106,6 +1156,7 @@ elif ::= elifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                                 System.out.println("Error en la condicion");
                         }else{
                                 System.out.println("Condicion correcta");
+                                if_mips(a.toString());
                         }
                         operandosArit =  "int";
                         operandosBool = false;
@@ -1116,6 +1167,7 @@ elif ::= elifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                                 System.out.println("Error en la condicion");
                         }else{
                                 System.out.println("Condicion correcta");
+                                if_mips(a.toString());
                         }
                         operandosArit =  "int";
                         operandosBool = false;
@@ -1126,6 +1178,7 @@ elif ::= elifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                                 System.out.println("Error en la condicion");
                         }else{
                                 System.out.println("Condicion correcta");
+                                if_mips(a.toString());
                         }
                         operandosArit =  "int";
                         operandosBool = false;
@@ -1136,6 +1189,7 @@ elif ::= elifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                         System.out.println("Error en la condicion");
                 }else{
                         System.out.println("Condicion correcta");
+                        if_mips(a.toString());
                 };
                 operandosArit =  "int";
                 operandosBool = false; RESULT = "if ("+a+"){"+b+"}"; :}
@@ -1144,6 +1198,7 @@ elif ::= elifC aperturaP operandoBool:a cerraduraP aperturaB bloque:b cerraduraB
                         System.out.println("Error en la condicion");
                 }else{
                         System.out.println("Condicion correcta");
+                        if_mips(a.toString());
                 };
                 operandosArit =  "int";
                 operandosBool = false;RESULT = "elif ("+a+"){"+b+"break$}"; :}
@@ -1188,7 +1243,15 @@ asignacion ::= ident:a equivalente agrupacionVariable:b {: verificarAsignacion(a
 //Declaración de un arreglo con tamaño estático, sin ser inicializado
 
 //Inicialización de un arreglo a una lista de valores
-arregloAsig ::= tipoArr:a ident:b aperturaC INTEGER_LITERAL:c cerraduraC equivalente aperturaC lista:d cerraduraC {: validarArreglo(a.toString(),b.toString(),c.toString(),d.toString()); RESULT = a+" "+b+" ["+c.toString()+"]"+" = ["+d+"]"; :}
+arregloAsig ::= tipoArr:a ident:b aperturaC INTEGER_LITERAL:c cerraduraC equivalente aperturaC lista:d cerraduraC 
+                {:
+
+                         boolean x = validarArreglo(a.toString(),b.toString(),c.toString(),d.toString());
+                         if(x){
+                                arregloMips(b.toString(), d.toString());
+                         }
+                         RESULT = a+" "+b+" ["+c.toString()+"]"+" = ["+d+"]"; 
+                :}
                 |tipoArr:c ident:a aperturaC INTEGER_LITERAL:b cerraduraC {: comprobarVariable(c.toString(), a.toString(), false); RESULT = c+" "+a+" ["+b.toString()+"]"; :}
                 ;
 
@@ -1213,7 +1276,7 @@ print ::= printC aperturaP STRING_LITERAL:a cerraduraP
 
 
 //Definición de la función input
-input ::= inputC aperturaP ident:a cerraduraP {: RESULT = "input("+a+")"; :};
+input ::= inputC aperturaP ident:a cerraduraP {: readMips(a.toString()); RESULT = "input("+a+")"; :};
 
 //Definición de uno o más parametros tipados y separados por coma 
 param ::= param:a coma param:b {: RESULT = a+","+b; System.out.println("XDXDDDD"); :}
@@ -1229,13 +1292,19 @@ funcionAsig ::= ident:a aperturaP listaParam:b cerraduraP {: RESULT = a+"("+b+")
 //Definición de la parte inicial de una variable, compuesta de un tipo y un identificador
 variable ::= tipoVar:a ident:b 
                 {: 
-                        comprobarVariable(a.toString(), b.toString(), false);
+                        boolean x = comprobarVariable(a.toString(), b.toString(), false);
+                        if(x){
+                                variable_mips(a.toString(), b.toString(), "");
+                        }
                         RESULT = a + " " + b;
                 :}
                 |
                 tipoArr:a ident:b 
                 {: 
-                        comprobarVariable(a.toString(), b.toString(), false);
+                        boolean x = comprobarVariable(a.toString(), b.toString(), false);
+                        if(x){
+                                variable_mips(a.toString(), b.toString(), "");
+                        }
                         RESULT = a + " " + b;
                 :}
                 |tipoArr:a ident:b equivalente agrupacionVariable:c 
@@ -1260,7 +1329,10 @@ variable ::= tipoVar:a ident:b
                                 operandosBool = false;
                                 operandosArit = "int";
                         }else{
-                                verificarInicializacion(b.toString(), a.toString(), c.toString()); 
+                                boolean x = verificarInicializacion(b.toString(), a.toString(), c.toString()); 
+                                if(x){
+                                        variable_mips(a.toString(), b.toString(), c.toString());
+                                }
                                 System.out.println("PARSER: sentencia: " + a + "\n");
                         }
                         RESULT = a + " " + b + " = " + c;
@@ -1274,7 +1346,7 @@ variable ::= tipoVar:a ident:b
                                 }else if(operandosArit.equals("int")){
                                         verificarInicializacion(b.toString(), a.toString(), "1"); 
                                 }else{
-                                        verificarInicializacion(b.toString(), a.toString(), "1.1"); 
+                                        verificarInicializacion(b.toString(), a.toString(), "1.1");
                                 }
                                 operandosArit = "int";
 
@@ -1288,19 +1360,28 @@ variable ::= tipoVar:a ident:b
                                 operandosBool = false;
                                 operandosArit = "int";
                         }else{
-                                verificarInicializacion(b.toString(), a.toString(), c.toString()); System.out.println("PARSER: sentencia: " + a + "\n");
+                                boolean x = verificarInicializacion(b.toString(), a.toString(), c.toString()); System.out.println("PARSER: sentencia: " + a + "\n");
+                                if(x){
+                                        variable_mips(a.toString(), b.toString(), c.toString());
+                                }
                         }
                         RESULT = a + " " + b + " = " + c;
                 :}
                 |tipoArr:a ident:b equivalente STRING_LITERAL:c 
                 {: 
-                        verificarInicializacion(b.toString(), a.toString(), "@"+c); 
+                        boolean x = verificarInicializacion(b.toString(), a.toString(), "@"+c); 
                         System.out.println("PARSER: sentencia: " + a + "\n");
+                        if(x){
+                                variable_mips(a.toString(), b.toString(), c.toString());
+                        }
                         RESULT = a + " " + b + " = " + c;
                 :}
                 |tipoVar:a ident:b equivalente STRING_LITERAL:c 
                 {: 
-                        verificarInicializacion(b.toString(), a.toString(), "@"+c); System.out.println("PARSER: sentencia: " + a + "\n");
+                        boolean x = verificarInicializacion(b.toString(), a.toString(), "@"+c); System.out.println("PARSER: sentencia: " + a + "\n");
+                        if(x){
+                                variable_mips(a.toString(), b.toString(), c.toString());
+                        }
                         RESULT = a + " " + b + " = " + c;
                 :}
             ;
@@ -1309,7 +1390,13 @@ variable ::= tipoVar:a ident:b
 declaracion ::= variable:a finalExpre {: RESULT = a+"$"; :}
                 |asignacion:a finalExpre {: RESULT = a+"$"; :}
                 |operacionNum:a finalExpre {: RESULT = a+"$"; :}
-                |funcionAsig:a finalExpre {: RESULT = a+"$"; :}
+                |funcionAsig:a finalExpre 
+                {:
+                        if(!parametrosFuncionAsig(a.toString()).equals("error")){
+                                cod_mips_text_temp.append("j "+a.toString());
+                        } 
+                                RESULT = a+"$"; 
+                :}
                 |operacionRacNum:a finalExpre {: RESULT = a+"$"; :}
                 |arregloAsig:a finalExpre {: RESULT = a+"$"; :}
                 |arregloInd:a finalExpre {: RESULT = a+"$"; :}
@@ -1421,16 +1508,39 @@ doD ::= doC aperturaB bloque:a cerraduraB {: RESULT = "do{"+a+"}"; :}
 whileD ::= whileC aperturaP condicion:a cerraduraP 
         {: 
                 if(operandosBool){
-                        System.out.println("Error en la condicion");
+                        System.out.println("Error en la condicion123");
                 }else{
-                        System.out.println("Condicion correcta");
+                        System.out.println("Condicion correcta123");
+                        doWhileMips(a.toString());
                 };
                 operandosArit =  "int";
                 operandosBool = false;
                 RESULT = "while("+a+")"; 
         :}
-        | whileC aperturaP operandoBool:a cerraduraP 
-        | whileC aperturaP expresionBool:a cerraduraP ;
+        | whileC aperturaP operandoBool:a cerraduraP{: 
+                if(operandosBool){
+                        System.out.println("Error en la condicion123");
+                }else{
+                        System.out.println("Condicion correcta123");
+                        doWhileMips(a.toString());
+                };
+                operandosArit =  "int";
+                operandosBool = false;
+                RESULT = "while("+a+")"; 
+        :}
+        | whileC aperturaP expresionBool:a cerraduraP
+        {: 
+                if(operandosBool){
+                        System.out.println("Error en la condicion123");
+                }else{
+                        System.out.println("Condicion correcta123");
+                        doWhileMips(a.toString());
+                };
+                operandosArit =  "int";
+                operandosBool = false;
+                RESULT = "while("+a+")"; 
+        :}
+        ;
 
 //Definición de bloque do-While
 bloqueDoWhile ::= doD:a whileD:b {: RESULT = a+""+b; :};
