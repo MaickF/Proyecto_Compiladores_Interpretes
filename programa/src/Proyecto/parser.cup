@@ -140,13 +140,24 @@ action code{:
     }
 
         public void print_mips(String print_string){
-                System.out.println("Entro al print");
                 String string_var_name = "var" + currentVar;
                 currentVar++;
                 cod_mips_data_temp.append(string_var_name + ": .asciiz \"" + print_string + "\\n\"\n");
                 cod_mips_text_temp.append("li $v0, 4\n");
                 cod_mips_text_temp.append("la $a0, " + string_var_name + "\n");
                 cod_mips_text_temp.append("syscall\n");
+        }
+
+        public void add_mips(String num1, String num2){
+                cod_mips_text_temp.append("li $t1, " + num1 + "\n");
+                cod_mips_text_temp.append("li $t2, " + num2 + "\n");
+                cod_mips_text_temp.append("add $s0, $t1, $t2" + "\n");
+                cod_mips_text_temp.append("syscall\n");
+        }
+
+        public void exit_mips(){
+                cod_mips_text.append("li $v0, 10\n");
+                cod_mips_text.append("syscall\n");
         }
 
         public void function_mips(String nombre, String parametros){
@@ -911,7 +922,7 @@ inicio ::= funciones main
                 ;
 
 //Símbolo inicial del programa
-ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); print_cod_mips();:};
+ini ::= inicio {: print_symbols_table(); System.out.println("Entro"); exit_mips(); print_cod_mips();:};
 
 //Operando numérico que posteriormente podrá ser utilizado para operaciones númericas y racionales
 operando ::=  INTEGER_LITERAL:a {: RESULT = a.toString();:}
@@ -928,6 +939,10 @@ operacionNumSim ::= operando:a operacionArit:b operando:c
                 {:
                         comprobarOperando(a.toString());
                         comprobarOperando(c.toString());
+                        System.out.println("in suma");
+                        if (b.toString().equals("+")){
+                                add_mips(a.toString(), c.toString());
+                        }
                         RESULT = a+" "+b+" "+c; 
                 :}
                 |aperturaP operando:a operacionArit:b operando:c cerraduraP 
